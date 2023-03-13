@@ -100,10 +100,10 @@ class random_variable {
       using variable_list = const std::vector<random_variable>;
       using data_list = const std::vector<value_type>;
     private:
-      variable_list rand_vars;
-      data_list data;
+      variable_list m_rand_vars;
+      xt::xarray<value_type> m_data;
     public:
-      explicit factor(variable_list rand_vars,
-                      data_list data) : rand_vars(rand_vars), data(data) { }
-  };
+/*      explicit factor(variable_list rand_vars,
+                      data_list data) : rand_vars(rand_vars), data(data) { } */
+      explicit factor(variable_list rand_vars, data_list data);
 }

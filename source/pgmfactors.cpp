@@ -24,12 +24,12 @@ namespace pgmfactors
 {
 // helper function to permute axes when they are specified out-of-order
 // upon construction for a PFactor
-std::vector<int> find_permutation_indices(const std::vector<int>& input)
+std::vector<int> find_permutation_indices(factor::variable_list& rvs)
 {
   // Create a vector of pairs that stores the original index of each element
   std::vector<std::pair<int, int>> indexed_input;
-  for (int i = 0; i < input.size(); i++) {
-    indexed_input.emplace_back(input[i], i);
+  for (int i = 0; i < rvs.size(); i++) {
+    indexed_input.emplace_back(rvs[i].id(), i);
   }
 
   // Sort the vector of pairs by the element value
@@ -40,13 +40,31 @@ std::vector<int> find_permutation_indices(const std::vector<int>& input)
 
   // Create a vector of permutation indices by mapping the sorted indices back
   // to the original indices
-  std::vector<int> permutation_indices(input.size());
-  for (int i = 0; i < input.size(); i++) {
+  std::vector<int> permutation_indices(rvs.size());
+  for (int i = 0; i < rvs.size(); i++) {
     permutation_indices[indexed_input[i].second] = i;
   }
 
   return permutation_indices;
 }
 
+
+
+factor::factor(variable_list rand_vars, data_list data) : m_rand_vars(rand_vars),
+                                                          m_data(data) {
+    if (std::is_sorted(rand_vars.begin(),
+                       rand_vars.end(),
+                       [](auto a, auto b) -> bool { return a.id() <= b.id(); })) {
+// TODO check precondition on cardinality of data
+// throw exception if length(data) != product(lengths(rand_vars))
+      m_data = data;
+      m_rand_vars
+    }
+
+  }
+    rand_vars(rand_vars), data(data) {
+    auto perms = find_permutation_indices(rand_vars);
+
+  }
 
 }  // namespace pgmfactors
