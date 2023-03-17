@@ -6,10 +6,6 @@ This is the pgmfactors project.
 
 See the [BUILDING](BUILDING.md) document.
 
-# Contributing
-
-See the [CONTRIBUTING](CONTRIBUTING.md) document.
-
 # Licensing
 
 Distributed under the Boost Software License, Version 1.0.
