@@ -38,7 +38,7 @@ enable_testing()
 find_package(Catch2 REQUIRED)
 include(Catch)
 
-add_executable(pgmfactors_test tests/pgmgactors_test.cpp)
+add_executable(pgmfactors_test tests/pgmfactors_test.cpp)
 target_link_libraries(pgmfactors_test PRIVATE pgmfactors_pgmfactors)
 catch_discover_tests(pgmfactors_test)
 
