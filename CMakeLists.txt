@@ -1,37 +1,25 @@
-cmake_minimum_required(VERSION 3.14)
-
-include(cmake/prelude.cmake)
+cmake_minimum_required(VERSION 3.16)
 
 project(
     pgmfactors
     VERSION 0.1.0
-    DESCRIPTION "Short description"
-    HOMEPAGE_URL "https://example.com/"
+    DESCRIPTION "Probability Factors using the XTensor library"
+    HOMEPAGE_URL "https://github.com/maspitz/pgmfactors"
     LANGUAGES CXX
 )
 
-include(cmake/project-is-top-level.cmake)
-include(cmake/variables.cmake)
+set(CMAKE_CXX_STANDARD 20)
+
+include(CTest)
+
+find_package(xtl REQUIRED)
+find_package(xtensor REQUIRED)
+
 
 # ---- Declare library ----
 
-add_library(
-    pgmfactors_pgmfactors
-    source/pgmfactors.cpp
-)
-add_library(pgmfactors::pgmfactors ALIAS pgmfactors_pgmfactors)
-
-include(GenerateExportHeader)
-generate_export_header(
-    pgmfactors_pgmfactors
-    BASE_NAME pgmfactors
-    EXPORT_FILE_NAME export/pgmfactors/pgmfactors_export.hpp
-    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
-)
-
-if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(pgmfactors_pgmfactors PUBLIC PGMFACTORS_STATIC_DEFINE)
-endif()
+add_library(pgmfactors_pgmfactors SHARED source/pgmfactors.cpp)
+target_include_directories(pgmfactors_pgmfactors PUBLIC include /usr/include)
 
 set_target_properties(
     pgmfactors_pgmfactors PROPERTIES
@@ -43,38 +31,14 @@ set_target_properties(
     OUTPUT_NAME pgmfactors
 )
 
-target_include_directories(
-    pgmfactors_pgmfactors ${warning_guard}
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-)
+add_executable(pgmexample apps/pgmexample.cpp)
+target_link_libraries(pgmexample pgmfactors_pgmfactors)
 
-target_include_directories(
-    pgmfactors_pgmfactors SYSTEM
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
-)
+enable_testing()
+find_package(Catch2 REQUIRED)
+include(Catch)
 
-target_compile_features(pgmfactors_pgmfactors PUBLIC cxx_std_17)
+add_executable(pgmfactors_test tests/pgmgactors_test.cpp)
+target_link_libraries(pgmfactors_test PRIVATE pgmfactors_pgmfactors)
+catch_discover_tests(pgmfactors_test)
 
-find_package(fmt REQUIRED)
-target_link_libraries(pgmfactors_pgmfactors PRIVATE fmt::fmt)
-
-# ---- Install rules ----
-
-if(NOT CMAKE_SKIP_INSTALL_RULES)
-  include(cmake/install-rules.cmake)
-endif()
-
-# ---- Developer mode ----
-
-if(NOT pgmfactors_DEVELOPER_MODE)
-  return()
-elseif(NOT PROJECT_IS_TOP_LEVEL)
-  message(
-      AUTHOR_WARNING
-      "Developer mode is intended for developers of pgmfactors"
-  )
-endif()
-
-include(cmake/dev-mode.cmake)
