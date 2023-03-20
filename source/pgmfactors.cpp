@@ -12,24 +12,25 @@ namespace pgmfactors
 {
 // helper function to permute axes when they are specified out-of-order
 // upon construction for a PFactor
-std::vector<int> find_permutation_indices(factor::variable_list& rvs)
+std::vector<unsigned int> find_permutation_indices(factor::variable_list& rvs)
 {
   // Create a vector of pairs that stores the original index of each element
-  std::vector<std::pair<int, int>> indexed_input;
-  for (int i = 0; i < rvs.size(); i++) {
+  using index_pair = std::pair<unsigned int, unsigned int>;
+  std::vector<index_pair> indexed_input;
+  for (unsigned int i = 0; i < rvs.size(); i++) {
     indexed_input.emplace_back(rvs[i].id(), i);
   }
 
   // Sort the vector of pairs by the element value
   std::sort(indexed_input.begin(),
             indexed_input.end(),
-            [](const std::pair<int, int>& a, const std::pair<int, int>& b)
+            [](const index_pair& a, const index_pair& b)
             { return a.first < b.first; });
 
   // Create a vector of permutation indices by mapping the sorted indices back
   // to the original indices
-  std::vector<int> permutation_indices(rvs.size());
-  for (int i = 0; i < rvs.size(); i++) {
+  std::vector<unsigned int> permutation_indices(rvs.size());
+  for (unsigned int i = 0; i < rvs.size(); i++) {
     permutation_indices[indexed_input[i].second] = i;
   }
 
