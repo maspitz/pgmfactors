@@ -8,18 +8,6 @@
 
 #include "pgmfactors/pgmfactors.hpp"
 
-#include <fmt/core.h>
-
-exported_class::exported_class()
-    : m_name {fmt::format("{}", "pgmfactors")}
-{
-}
-
-auto exported_class::name() const -> const char*
-{
-  return m_name.c_str();
-}
-
 namespace pgmfactors
 {
 // helper function to permute axes when they are specified out-of-order
@@ -50,21 +38,29 @@ std::vector<int> find_permutation_indices(factor::variable_list& rvs)
 
 
 
-factor::factor(variable_list rand_vars, data_list data) : m_rand_vars(rand_vars),
-                                                          m_data(data) {
-    if (std::is_sorted(rand_vars.begin(),
-                       rand_vars.end(),
-                       [](auto a, auto b) -> bool { return a.id() <= b.id(); })) {
+factor::factor(variable_list rand_vars, data_list data) {
+
 // TODO check precondition on cardinality of data
 // throw exception if length(data) != product(lengths(rand_vars))
-      m_data = data;
-      m_rand_vars
-    }
 
+  if (std::is_sorted(rand_vars.begin(),
+                       rand_vars.end(),
+                       [](auto a, auto b) -> bool { return a.id() <= b.id(); })) {
+    m_data = data;
+    m_rand_vars = rand_vars;
   }
-    rand_vars(rand_vars), data(data) {
+  else
+  {
     auto perms = find_permutation_indices(rand_vars);
-
+    m_data = xt::transpose(data, perms);
+    m_rand_vars = rand_vars;
+    std::sort(m_rand_vars.begin(),
+              m_rand_vars.end(),
+              [](auto a, auto b) -> bool { return a.id() < b.id(); });
+    // TODO throw exception if a rand var id is repeated.
   }
+
+
+}
 
 }  // namespace pgmfactors
