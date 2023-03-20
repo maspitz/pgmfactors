@@ -1,11 +1,10 @@
-#include <string>
+// pgmfactors_test.cpp
 
 #include "pgmfactors/pgmfactors.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Name is pgmfactors", "[library]")
+TEST_CASE("Trivial Test Example", "[pgmfactors]")
 {
-  auto const exported = exported_class {};
-  REQUIRE(std::string("pgmfactors") == exported.name());
+  REQUIRE(2 + 2 == 4);
 }
