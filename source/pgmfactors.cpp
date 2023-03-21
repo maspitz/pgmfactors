@@ -12,7 +12,7 @@ namespace pgmfactors
 {
 // helper function to permute axes when they are specified out-of-order
 // upon construction for a PFactor
-std::vector<unsigned int> find_permutation_indices(factor::rv_list& rvs)
+std::vector<unsigned int> find_permutation_indices(const factor::rv_list& rvs)
 {
   // Create a vector of pairs that stores the original index of each element
   using index_pair = std::pair<unsigned int, unsigned int>;
@@ -39,7 +39,7 @@ std::vector<unsigned int> find_permutation_indices(factor::rv_list& rvs)
 
 
 
-factor::factor(rv_list rand_vars, data_array data) {
+factor::factor(const rv_list rand_vars, const data_array data) {
 
 // TODO check precondition on cardinality of data
 // throw exception if length(data) != product(lengths(rand_vars))
