@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-
+#include <xtensor/xarray.hpp>
 
 namespace pgmfactors {
 
