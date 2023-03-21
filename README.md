@@ -1,6 +1,8 @@
 # pgmfactors
 
-This is the pgmfactors project.
+This project implements discrete factor operations useful for probabilistic graphical models. These are useful in the construction of Hidden Markov Models and Bayesian Networks.
+
+The current version of pgmfactors uses the XTensor library's xt::xarray, an n-dimensional array with shape determined at runtime. This is suited for rapid prototyping, model exploration, and structure learning. Later versions of pgmfactors may include xt::xtensor and xt::xtensor_fixed in order to optimize graphical models that are determined at compile time.
 
 # Building and installing
 
