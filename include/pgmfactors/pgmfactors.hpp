@@ -21,7 +21,8 @@ namespace pgmfactors {
       xt::xarray<value_type> m_data;
     public:
       explicit factor(const rv_list &rand_vars, const data_array &data);
-      auto data() -> data_array { return m_data; }
-};
+      auto data() const -> const data_array& { return m_data; }
+      auto vars() const -> const rv_list& { return m_rand_vars; }
+  };
 
 } // namespace pgmfactors
