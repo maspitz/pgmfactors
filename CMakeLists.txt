@@ -33,7 +33,7 @@ set_target_properties(
 )
 
 add_executable(pgmexample apps/pgmexample.cpp)
-target_link_libraries(pgmexample pgmfactors_pgmfactors)
+target_link_libraries(pgmexample xtensor pgmfactors_pgmfactors)
 
 enable_testing()
 find_package(Catch2 REQUIRED)
