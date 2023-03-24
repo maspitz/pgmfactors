@@ -18,8 +18,9 @@ find_package(xtensor REQUIRED)
 
 # ---- Declare library ----
 
-add_library(pgmfactors_pgmfactors SHARED source/pgmfactors.cpp)
+add_library(pgmfactors_pgmfactors OBJECT source/pgmfactors.cpp)
 target_include_directories(pgmfactors_pgmfactors PUBLIC include /usr/include)
+target_link_libraries(pgmfactors_pgmfactors xtensor)
 
 set_target_properties(
     pgmfactors_pgmfactors PROPERTIES
