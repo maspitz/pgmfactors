@@ -67,11 +67,14 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 		a_reshape.insert(a_reshape.end(), (b_card.end() - it_bcard), 1);
 	}
 
-	// TODO: make factor data views using a_reshape and b_reshape
+	// make factor data views using a_reshape and b_reshape
 	// multiply the views to obtain the product_data
 	// return the product factor constructed from the
 	// product_vars and product_data
 
+  auto view_a = xt::reshape_view(f_a.data(), a_reshape);
+  auto view_b = xt::reshape_view(f_b.data(), b_reshape);
+  return factor(product_vars, view_a * view_b);
 }
 
 
