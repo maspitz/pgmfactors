@@ -10,6 +10,72 @@
 
 namespace pgmfactors
 {
+
+
+auto factor_product(const factor& f_a, const factor& f_b) -> factor {
+	auto a_vars = f_a.vars();
+	auto a_card = f_a.data().shape();
+
+	auto b_vars = f_b.vars();
+	auto b_card = f_b.data().shape();
+
+	auto product_vars = factor::rv_list{};
+	auto product_card = std::vector<int>{};
+	auto a_reshape = std::vector<int>{};
+	auto b_reshape = std::vector<int>{};
+
+	// Merge a_vars and b_vars [invariant: strictly ascending order]
+	auto it_avars = a_vars.begin(), it_acard = a_card.begin();
+	auto it_bvars = b_vars.begin(), it_bcard = b_card.begin();
+
+	// Step through both a_vars and b_vars,
+	// appending the lesser-id variable at each step.
+	while(it_avars != a_vars.end() && it_bvars != b_vars.end()) {
+		if (*it_avars < *it_bvars) {
+			product_vars.push_back(*it_avars);
+			product_card.push_back(*it_acard);
+			a_reshape.push_back(*it_acard);
+			b_reshape.push_back(1);
+			++it_avars; ++it_acard;
+		} else if (*it_bvars < *it_avars) {
+			product_vars.push_back(*it_bvars);
+			product_card.push_back(*it_bcard);
+			a_reshape.push_back(1);
+			b_reshape.push_back(*it_bcard);
+			++it_bvars; ++it_bcard;
+		} else {
+			// ASSERT(*it_acard == *it_bcard);
+			product_vars.push_back(*it_avars);
+			product_card.push_back(*it_acard);
+			a_reshape.push_back(*it_acard);
+			b_reshape.push_back(*it_acard);
+			++it_avars; ++it_acard;
+			++it_bvars; ++it_bcard;
+		}
+	}
+	if (it_avars != a_vars.end()) {
+	// Add any remaining elements from a_vars
+		product_vars.insert(product_vars.end(), it_avars, a_vars.end());
+		product_card.insert(product_card.end(), it_acard, a_card.end());
+		a_reshape.insert(a_reshape.end(), it_acard, a_card.end());
+		b_reshape.insert(b_reshape.end(), (a_card.end() - it_acard), 1);
+	} else if (it_bvars != b_vars.end()) {
+	// Add any remaining elements from b_vars
+		product_vars.insert(product_vars.end(), it_bvars, b_vars.end());
+		product_card.insert(product_card.end(), it_bcard, b_card.end());
+		b_reshape.insert(b_reshape.end(), it_bcard, b_card.end());
+		a_reshape.insert(a_reshape.end(), (b_card.end() - it_bcard), 1);
+	}
+
+	// TODO: make factor data views using a_reshape and b_reshape
+	// multiply the views to obtain the product_data
+	// return the product factor constructed from the
+	// product_vars and product_data
+
+}
+
+
+
 // helper function to permute axes when they are specified out-of-order
 // upon construction for a PFactor
 auto find_permutation_indices(const factor::rv_list& rvs) -> std::vector<unsigned int>
