@@ -25,8 +25,8 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	auto b_reshape = std::vector<int>{};
 
 	// Merge a_vars and b_vars [invariant: strictly ascending order]
-	auto it_avars = a_vars.begin(), it_acard = a_card.begin();
-	auto it_bvars = b_vars.begin(), it_bcard = b_card.begin();
+	auto it_avars = a_vars.begin(),	it_bvars = b_vars.begin();
+	auto it_acard = a_card.begin(), it_bcard = b_card.begin();
 
 	// Step through both a_vars and b_vars,
 	// appending the lesser-id variable at each step.
