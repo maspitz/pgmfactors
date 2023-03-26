@@ -54,6 +54,11 @@ int main() {
     auto mydata = pgmfactors::factor::data_array({{1,2},{3,4}});
     pgmfactors::factor f(rvlst, mydata);
 
-    print_xarray_with_coords(f.data());
+    auto f_ABC = pgmfactors::factor_product(f_AB, f_BC);
+    print_factor(f,"f");
+
+    print_factor(f_AB, "AB");
+    print_factor(f_BC, "BC");
+    print_factor(f_ABC, "ABC");
     return 0;
 }
