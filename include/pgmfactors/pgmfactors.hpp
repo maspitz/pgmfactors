@@ -6,6 +6,9 @@
 
 namespace pgmfactors {
 
+  class factor;
+
+  auto factor_product(const factor& f_a, const factor& f_b) -> factor;
 
   // Note: Factor models only discrete factors at this time
   // Class invariants
