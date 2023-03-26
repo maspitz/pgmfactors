@@ -1,5 +1,6 @@
 // pgmexample.cpp
 #include <iostream>
+#include <string_view>
 #include <xtensor/xstrides.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xarray.hpp>
@@ -16,9 +17,22 @@ void print_xarray_with_coords(const xt::xarray<T> &xa) {
         for(auto idx_coord : idx_vector) {
             std::cout << idx_coord << " ";
         }
-        std::cout << val << std::endl;
+        std::cout << val << "\n";
         flat_index++;
     }
+    std::cout << std::flush;
+}
+
+void print_factor(const pgmfactors::factor& f, std::string_view name="") {
+    auto vars = f.vars();
+    std::cout << "Factor " << name << ":\n";
+    for(auto rv_id : vars) {
+        std::cout << rv_id << " ";
+    }
+    std::cout << "\n-----\n";
+    print_xarray_with_coords(f.data());
+    std::cout << "\n";
+    std::cout << std::flush;
 }
 
 
