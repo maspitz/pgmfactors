@@ -40,6 +40,6 @@ find_package(Catch2 REQUIRED)
 include(Catch)
 
 add_executable(pgmfactors_test test/pgmfactors_test.cpp)
-target_link_libraries(pgmfactors_test PRIVATE pgmfactors_pgmfactors)
+target_link_libraries(pgmfactors_test PRIVATE pgmfactors_pgmfactors Catch2::Catch2WithMain)
 catch_discover_tests(pgmfactors_test)
 
