@@ -8,6 +8,7 @@
 TEST_CASE("Factor Product", "[pgmfactors]")
 {
 
+
     auto AB_data = xt::xarray<double>{0.5, 0.8, 0.1, 0.0, 0.3, 0.9};
     AB_data.reshape({3, 2});
     auto AB_vars = pgmfactors::factor::rv_list{1,2};
@@ -30,7 +31,7 @@ TEST_CASE("Factor Product", "[pgmfactors]")
     auto expected_data = xt::xarray<double>{
     0.25, 0.35, 0.08, 0.16,
     0.05, 0.07, 0.00, 0.00,
-    0.15, 0.20, 0.09, 0.18};
+    0.15, 0.21, 0.09, 0.18};
     expected_data.reshape({3, 2, 2});
     auto expected_factor = pgmfactors::factor(expected_vars,
                                               pgmfactors::factor::data_array(expected_data));
