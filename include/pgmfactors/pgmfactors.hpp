@@ -33,6 +33,7 @@ namespace pgmfactors {
       explicit factor(const rv_list &rand_vars, const data_array &data);
       auto data() const -> const data_array& { return m_data; }
       auto vars() const -> const rv_list& { return m_rand_vars; }
+      auto operator==(const factor&) const -> bool = default;
   };
 
 } // namespace pgmfactors
