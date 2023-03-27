@@ -11,6 +11,12 @@
 namespace pgmfactors
 {
 
+  auto is_close(const factor& f_a, const factor& f_b, double rtol, double atol) -> bool {
+    return (f_a.vars() == f_b.vars()) &&
+      (xt::allclose(f_a.data(), f_b.data(), rtol, atol));
+  }
+
+
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	auto a_vars = f_a.vars();

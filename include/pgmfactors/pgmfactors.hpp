@@ -8,6 +8,13 @@ namespace pgmfactors {
 
   class factor;
 
+  // Tests if two factors are identical in scope and numerically close in value.
+  // rtol: relative tolerance
+  // atol: absolute tolerance
+  auto is_close(const factor& f_a, const factor& f_b,
+                double rtol = 1e-5, double atol = 1e-8) -> bool;
+
+
   auto factor_product(const factor& f_a, const factor& f_b) -> factor;
 
   // Note: Factor models only discrete factors at this time
