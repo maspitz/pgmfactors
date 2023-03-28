@@ -4,6 +4,30 @@
 #include <catch2/catch_test_macros.hpp>
 
 
+TEST_CASE("Factor Equality Operation") {
+    auto AB_data = xt::xarray<double>{0.5, 0.8, 0.1, 0.0, 0.3, 0.9};
+    AB_data.reshape({3, 2});
+    auto AB_vars = pgmfactors::factor::rv_list{1,2};
+    pgmfactors::factor f_AB(AB_vars,
+                            pgmfactors::factor::data_array(AB_data));
+
+    REQUIRE(f_AB == f_AB);
+
+    auto AB_data_tweaked = xt::xarray<double>{1.0, 0.8, 0.1, 0.0, 0.3, 0.9};
+    AB_data_tweaked.reshape({3, 2});
+    pgmfactors::factor f_AB_data_tweaked(AB_vars,
+                            pgmfactors::factor::data_array(AB_data_tweaked));
+
+    REQUIRE(f_AB != f_AB_data_tweaked);
+
+    auto AB_vars_tweaked = pgmfactors::factor::rv_list{1,3};
+    pgmfactors::factor f_AB_vars_tweaked(AB_vars_tweaked,
+                            pgmfactors::factor::data_array(AB_data));
+
+    REQUIRE(f_AB != f_AB_vars_tweaked);
+
+}
+
 TEST_CASE("Factor Product", "[factor][operation]")
 {
 
