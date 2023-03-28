@@ -36,7 +36,16 @@ add_executable(pgmexample apps/pgmexample.cpp)
 target_link_libraries(pgmexample xtensor pgmfactors_pgmfactors)
 
 enable_testing()
-find_package(Catch2 REQUIRED)
+
+Include(FetchContent)
+
+FetchContent_Declare(
+	Catch2
+	GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+	GIT_TAG        v3.3.2
+)
+
+FetchContent_MakeAvailable(Catch2)
 include(Catch)
 
 add_executable(pgmfactors_test test/pgmfactors_test.cpp)
