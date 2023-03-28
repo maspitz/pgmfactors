@@ -28,6 +28,24 @@ TEST_CASE("Factor Equality Operation") {
 
 }
 
+TEST_CASE("Factor Index Sorting") {
+    auto AB_data = xt::xarray<double>{0.5, 0.8, 0.1, 0.0, 0.3, 0.9};
+    AB_data.reshape({3, 2});
+    auto AB_vars = pgmfactors::factor::rv_list{1,2};
+    pgmfactors::factor f_AB(AB_vars,
+                            pgmfactors::factor::data_array(AB_data));
+
+    // Now construct an equivalent factor, but with variables given
+    // in reversed order: {2,1} rather than {1,2}.
+    auto AB_permuted_data = xt::xarray<double>{0.5, 0.1, 0.3, 0.8, 0.0, 0.9};
+    AB_permuted_data.reshape({2, 3});
+    auto AB_permuted_vars = pgmfactors::factor::rv_list{2,1};
+    pgmfactors::factor f_AB_permuted(AB_permuted_vars,
+                                     pgmfactors::factor::data_array(AB_permuted_data));
+
+    REQUIRE(f_AB == f_AB_permuted);
+}
+
 TEST_CASE("Factor Product", "[factor][operation]")
 {
 
