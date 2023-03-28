@@ -20,6 +20,7 @@ TEST_CASE("Factor Product", "[factor][operation]")
     pgmfactors::factor f_BC(BC_vars,
                             pgmfactors::factor::data_array(BC_data));;
 
+    SECTION("Product of factors sharing one variable") {
     // Perform factor product and compare to expected result.
     // Use is_close() because floating point calculations
     // aren't expected to yield strict equality.
@@ -36,5 +37,15 @@ TEST_CASE("Factor Product", "[factor][operation]")
                                                  pgmfactors::factor::data_array(expected_data));
       REQUIRE(is_close(calculated_product, expected_product));
     }
+
+    SECTION("Product of factor with itself") {
+      auto calculated_self_product = pgmfactors::factor_product(f_AB, f_AB);
+      auto expected_vars = f_AB.vars();
+      auto expected_data = f_AB.data() * f_AB.data();  // elementwise multiplication
+      auto expected_self_product = pgmfactors::factor(expected_vars,
+                                                      pgmfactors::factor::data_array(expected_data));
+      REQUIRE(is_close(calculated_self_product, expected_self_product));
+    }
+
 
 }
