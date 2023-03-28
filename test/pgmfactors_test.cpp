@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 
-TEST_CASE("Factor Product", "[pgmfactors]")
+TEST_CASE("Factor Product", "[factor][operation]")
 {
 
 
@@ -24,16 +24,17 @@ TEST_CASE("Factor Product", "[pgmfactors]")
     // Use is_close() because floating point calculations
     // aren't expected to yield strict equality.
 
-    auto f_product = pgmfactors::factor_product(f_AB, f_BC);
+      auto calculated_product = pgmfactors::factor_product(f_AB, f_BC);
 
-    auto expected_vars = pgmfactors::factor::rv_list{1,2,3};
-    auto expected_data = xt::xarray<double>{
-    0.25, 0.35, 0.08, 0.16,
-    0.05, 0.07, 0.00, 0.00,
-    0.15, 0.21, 0.09, 0.18};
-    expected_data.reshape({3, 2, 2});
-    auto expected_factor = pgmfactors::factor(expected_vars,
-                                              pgmfactors::factor::data_array(expected_data));
-    REQUIRE(is_close(f_product, expected_factor));
+      auto expected_vars = pgmfactors::factor::rv_list{1,2,3};
+      auto expected_data = xt::xarray<double>{
+      0.25, 0.35, 0.08, 0.16,
+      0.05, 0.07, 0.00, 0.00,
+      0.15, 0.21, 0.09, 0.18};
+      expected_data.reshape({3, 2, 2});
+      auto expected_product = pgmfactors::factor(expected_vars,
+                                                 pgmfactors::factor::data_array(expected_data));
+      REQUIRE(is_close(calculated_product, expected_product));
+    }
 
 }
