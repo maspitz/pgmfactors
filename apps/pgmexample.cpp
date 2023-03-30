@@ -67,5 +67,21 @@ int main() {
     print_factor(factor_marginalization(f_ABC, 2), "ABC-2");
     print_factor(factor_marginalization(f_ABC, 3), "ABC-3");
 
+
+    auto d1_data = xt::xarray<double>{0.5, 0.2, 0.0000001, 0.0000001, 0.3, 0.45};
+    d1_data.reshape({3, 2});
+    auto d1_vars = pgmfactors::factor::rv_list{1,2};
+    pgmfactors::factor f_d1(d1_vars,
+                            pgmfactors::factor::data_array(d1_data));;
+
+    auto d2_data = xt::xarray<double>{0.8, 0.001, 0.6};
+    d2_data.reshape({3});
+    auto d2_vars = pgmfactors::factor::rv_list{1};
+    pgmfactors::factor f_d2(d2_vars,
+                            pgmfactors::factor::data_array(d2_data));;
+
+    print_factor(factor_division(f_d1, f_d2), "d1/d2");
+
+
     return 0;
 }

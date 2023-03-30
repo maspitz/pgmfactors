@@ -70,6 +70,8 @@ auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -
   return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
 }
 
+
+
 auto factor_marginalization(const factor& f_a, int summation_rv) -> factor {
   auto a_vars = f_a.vars();
   auto a_rv_it = std::find(a_vars.begin(), a_vars.end(), summation_rv);
@@ -147,6 +149,45 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor {
   auto view_a = xt::reshape_view(f_a.data(), a_reshape);
   auto view_b = xt::reshape_view(f_b.data(), b_reshape);
   return factor(product_vars, view_a * view_b);
+}
+
+
+auto factor_division(const factor& f_a, const factor& f_b) -> factor {
+	auto a_vars = f_a.vars();
+	auto a_card = f_a.data().shape();
+
+	auto b_vars = f_b.vars();
+	auto b_card = f_b.data().shape();
+
+	auto b_reshape = std::vector<int>{};
+
+	// Merge a_vars and b_vars [invariant: strictly ascending order]
+	auto it_avars = a_vars.begin(),	it_bvars = b_vars.begin();
+	auto it_bcard = b_card.begin();
+
+	// Step through both a_vars and b_vars,
+	// appending the lesser-id variable at each step.
+	while(it_avars != a_vars.end()) {
+		if (*it_avars < *it_bvars) {
+			b_reshape.push_back(1);
+			++it_avars;
+		} else if (*it_bvars < *it_avars) {
+      throw std::runtime_error("Scope mismatch: some variable in f_b is not present in f_a");
+		} else {
+      b_reshape.push_back(*it_bcard);
+      ++it_avars;
+      ++it_bvars;
+      ++it_bcard;
+		}
+	}
+  if (it_bvars != b_vars.end()) {
+      throw std::runtime_error("Scope mismatch: some variable in f_b is not present in f_a");
+  }
+
+  auto view_b = xt::reshape_view(f_b.data(), b_reshape);
+  // TODO: handle the case of 0 / 0, in which we are to take the relaxed view
+  // that 0 / 0 should be taken to yield 0.
+  return factor(a_vars, f_a.data() / view_b);
 }
 
 
