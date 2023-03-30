@@ -17,22 +17,6 @@ namespace pgmfactors
   }
 
 
-/*
-**     std::map<int,int> assignment{{3,0}};
-    // example of factor reduction on f_ABC.  using context of rv 3 taking on value 0.
-    auto abc_data = f_ABC.data();
-
-    xt::xstrided_slice_vector sv;
-    sv.push_back(xt::all());  // rv 1
-    sv.push_back(xt::all());  // rv 2
-    sv.push_back(0);          // rv 3
-    auto v2_data = xt::strided_view(abc_data, sv);
-    auto v2_vars = pgmfactors::factor::rv_list{1,2};
-    pgmfactors::factor fv2(v2_vars, v2_data);
-    print_factor(fv2, "v2");
-
- */
-
 auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor {
   auto a_vars = f_a.vars();
   factor::rv_list b_vars;
