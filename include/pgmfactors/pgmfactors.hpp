@@ -16,6 +16,7 @@ namespace pgmfactors {
 
 
   auto factor_product(const factor& f_a, const factor& f_b) -> factor;
+  auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor;
 
   // Note: Factor models only discrete factors at this time
   // Class invariants
@@ -27,6 +28,7 @@ namespace pgmfactors {
       using rv_list = std::vector<int>;
       using data_array = xt::xarray<value_type>;
     private:
+      // TODO consider calling the set of variables the 'scope'. (p.104)
       rv_list m_rand_vars;
       xt::xarray<value_type> m_data;
     public:
@@ -35,5 +37,6 @@ namespace pgmfactors {
       auto vars() const -> const rv_list& { return m_rand_vars; }
       auto operator==(const factor&) const -> bool = default;
   };
+
 
 } // namespace pgmfactors

@@ -4,7 +4,7 @@
 #include <xtensor/xarray.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xadapt.hpp>
-
+#include <xtensor/xstrided_view.hpp>
 
 #include "pgmfactors/pgmfactors.hpp"
 
@@ -16,6 +16,55 @@ namespace pgmfactors
       (xt::allclose(f_a.data(), f_b.data(), rtol, atol));
   }
 
+
+/*
+**     std::map<int,int> assignment{{3,0}};
+    // example of factor reduction on f_ABC.  using context of rv 3 taking on value 0.
+    auto abc_data = f_ABC.data();
+
+    xt::xstrided_slice_vector sv;
+    sv.push_back(xt::all());  // rv 1
+    sv.push_back(xt::all());  // rv 2
+    sv.push_back(0);          // rv 3
+    auto v2_data = xt::strided_view(abc_data, sv);
+    auto v2_vars = pgmfactors::factor::rv_list{1,2};
+    pgmfactors::factor fv2(v2_vars, v2_data);
+    print_factor(fv2, "v2");
+
+ */
+
+auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor {
+  auto a_vars = f_a.vars();
+  factor::rv_list b_vars;
+
+  xt::xstrided_slice_vector sv;
+
+  auto it_avars = a_vars.begin();
+  auto it_x = assignment.begin();
+
+  while(it_avars != a_vars.end() && it_x != assignment.end()) {
+    if (*it_avars > it_x->first) {
+      // assignment rv not in input factor: advance to next assignment rv.
+      it_x++;
+    } else if (*it_avars < it_x->first) {
+      // input factor rv is unassigned: include axis in output factor.
+      sv.push_back(xt::all());
+      b_vars.push_back(*it_avars);
+      it_avars++;
+    } else {
+      // input factor rv is assigned: reduce output factor according to the assignment.
+      sv.push_back(it_x->second);
+      it_avars++;
+      it_x++;
+    }
+  }
+  if (it_avars != a_vars.end()) {
+    // add any remaining unassigned random variables and include their axes.
+    sv.insert(sv.end(), (a_vars.end() - it_avars), xt::all());
+    b_vars.insert(b_vars.end(), it_avars, a_vars.end());
+  }
+  return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
+}
 
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {

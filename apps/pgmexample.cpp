@@ -1,10 +1,9 @@
 // pgmexample.cpp
 #include <iostream>
+#include <map>
 #include <string_view>
-#include <xtensor/xstrides.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xarray.hpp>
-#include <xtensor/xstrided_view.hpp>
 #include <xtensor/xtensor.hpp>
 #include <xtensor/xaxis_iterator.hpp>
 #include <xtensor/xaxis_slice_iterator.hpp>
@@ -63,17 +62,12 @@ int main() {
     print_factor(f_ABC, "ABC");
 
 
-    // example of factor reduction on f_ABC.  using context of rv 3 taking on value 0.
-    auto abc_data = f_ABC.data();
-    xt::xstrided_slice_vector sv;
-    sv.push_back(xt::all());  // rv 1
-    sv.push_back(xt::all());  // rv 2
-    sv.push_back(0);          // rv 3
-    auto v2_data = xt::strided_view(abc_data, sv);
-    auto v2_vars = pgmfactors::factor::rv_list{1,2};
-    pgmfactors::factor fv2(v2_vars, v2_data);
-    print_factor(fv2, "v2");
-
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{1,0}}), "rv1 = 0");
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{1,1}}), "rv1 = 1");
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,1}}), "rv2 = 1");
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{3,0}}), "rv3 = 0");
+    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{3,1}}), "rv3 = 1");
 
     return 0;
 }
