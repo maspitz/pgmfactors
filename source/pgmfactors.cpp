@@ -51,6 +51,26 @@ auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) ->
 }
 
 
+auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -> factor {
+  auto a_vars = f_a.vars();
+  factor::rv_list b_vars;
+  xt::xstrided_slice_vector sv;
+
+  for(auto avar : a_vars) {
+    if (auto value = assignment.find(avar); value != assignment.end()) {
+      sv.push_back(value->second);
+    }
+    else
+    {
+      b_vars.push_back(avar);
+      sv.push_back(xt::all());
+    }
+  }
+
+  return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
+}
+
+
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	auto a_vars = f_a.vars();
 	auto a_card = f_a.data().shape();

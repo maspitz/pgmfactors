@@ -17,6 +17,7 @@ namespace pgmfactors {
 
   auto factor_product(const factor& f_a, const factor& f_b) -> factor;
   auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor;
+  auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -> factor;
 
   // Note: Factor models only discrete factors at this time
   // Class invariants
