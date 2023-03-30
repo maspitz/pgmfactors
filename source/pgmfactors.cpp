@@ -70,6 +70,19 @@ auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -
   return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
 }
 
+auto factor_marginalization(const factor& f_a, int summation_rv) -> factor {
+  auto a_vars = f_a.vars();
+  auto a_rv_it = std::find(a_vars.begin(), a_vars.end(), summation_rv);
+  if (a_rv_it == a_vars.end()) {
+    return f_a;
+  }
+  int rv_axis = a_rv_it - a_vars.begin();
+  factor::rv_list b_vars;
+  b_vars.insert(b_vars.end(),a_vars.begin(), a_rv_it);
+  b_vars.insert(b_vars.end(),a_rv_it + 1, a_vars.end());
+
+  return pgmfactors::factor(b_vars, xt::sum(f_a.data(), {rv_axis}));
+}
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	auto a_vars = f_a.vars();

@@ -62,20 +62,10 @@ int main() {
     print_factor(f_ABC, "ABC");
 
 
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{1,0}}), "rv1 = 0");
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{1,1}}), "rv1 = 1");
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,1}}), "rv2 = 1");
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{3,0}}), "rv3 = 0");
-    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{3,1}}), "rv3 = 1");
-
-
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{1,0}}), "rv1 = 0");
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{1,1}}), "rv1 = 1");
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{2,1}}), "rv2 = 1");
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{3,0}}), "rv3 = 0");
-    print_factor(pgmfactors::factor_reduction2(f_ABC, std::map<int,int>{{3,1}}), "rv3 = 1");
+//    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
+    print_factor(factor_marginalization(f_ABC, 1), "ABC-1");
+    print_factor(factor_marginalization(f_ABC, 2), "ABC-2");
+    print_factor(factor_marginalization(f_ABC, 3), "ABC-3");
 
     return 0;
 }
