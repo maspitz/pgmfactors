@@ -8,7 +8,7 @@
 
 #include "pgmfactors/pgmfactors.hpp"
 
-namespace pgmfactors
+namespace pgm
 {
 
   auto is_close(const factor& f_a, const factor& f_b, double rtol, double atol) -> bool {
@@ -47,7 +47,7 @@ auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) ->
     sv.insert(sv.end(), (a_vars.end() - it_avars), xt::all());
     b_vars.insert(b_vars.end(), it_avars, a_vars.end());
   }
-  return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
+  return pgm::factor(b_vars, xt::strided_view(f_a.data(), sv));
 }
 
 
@@ -67,7 +67,7 @@ auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -
     }
   }
 
-  return pgmfactors::factor(b_vars, xt::strided_view(f_a.data(), sv));
+  return pgm::factor(b_vars, xt::strided_view(f_a.data(), sv));
 }
 
 
@@ -83,7 +83,7 @@ auto factor_marginalization(const factor& f_a, int summation_rv) -> factor {
   b_vars.insert(b_vars.end(),a_vars.begin(), a_rv_it);
   b_vars.insert(b_vars.end(),a_rv_it + 1, a_vars.end());
 
-  return pgmfactors::factor(b_vars, xt::sum(f_a.data(), {rv_axis}));
+  return pgm::factor(b_vars, xt::sum(f_a.data(), {rv_axis}));
 }
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {
@@ -245,4 +245,4 @@ factor::factor(const factor::rv_list &rand_vars, const factor::data_array &data)
 
 }
 
-}  // namespace pgmfactors
+}  // namespace pgm

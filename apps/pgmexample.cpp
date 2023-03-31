@@ -23,7 +23,7 @@ void print_xarray_with_coords(const xt::xarray<T> &xa) {
     std::cout << std::flush;
 }
 
-void print_factor(const pgmfactors::factor& f, std::string_view name="") {
+void print_factor(const pgm::factor& f, std::string_view name="") {
     auto vars = f.vars();
     std::cout << "Factor " << name << ":\n";
     for(auto rv_id : vars) {
@@ -40,21 +40,21 @@ int main() {
 
     auto AB_data = xt::xarray<double>{0.5, 0.8, 0.1, 0.0, 0.3, 0.9};
     AB_data.reshape({3, 2});
-    auto AB_vars = pgmfactors::factor::rv_list{1,2};
-    pgmfactors::factor f_AB(AB_vars,
-                            pgmfactors::factor::data_array(AB_data));;
+    auto AB_vars = pgm::factor::rv_list{1,2};
+    pgm::factor f_AB(AB_vars,
+                            pgm::factor::data_array(AB_data));;
 
     auto BC_data = xt::xarray<double>{0.5, 0.7, 0.1, 0.2};
     BC_data.reshape({2, 2});
-    auto BC_vars = pgmfactors::factor::rv_list{2,3};
-    pgmfactors::factor f_BC(BC_vars,
-                            pgmfactors::factor::data_array(BC_data));;
+    auto BC_vars = pgm::factor::rv_list{2,3};
+    pgm::factor f_BC(BC_vars,
+                            pgm::factor::data_array(BC_data));;
 
-    auto rvlst = pgmfactors::factor::rv_list{1,2};
-    auto mydata = pgmfactors::factor::data_array({{1,2},{3,4}});
-    pgmfactors::factor f(rvlst, mydata);
+    auto rvlst = pgm::factor::rv_list{1,2};
+    auto mydata = pgm::factor::data_array({{1,2},{3,4}});
+    pgm::factor f(rvlst, mydata);
 
-    auto f_ABC = pgmfactors::factor_product(f_AB, f_BC);
+    auto f_ABC = pgm::factor_product(f_AB, f_BC);
     print_factor(f,"f");
 
     print_factor(f_AB, "AB");
@@ -62,7 +62,7 @@ int main() {
     print_factor(f_ABC, "ABC");
 
 
-//    print_factor(pgmfactors::factor_reduction(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
+//    print_factor(pgm::factor_reduction(f_ABC, std::map<int,int>{{2,0},{1,1}}), "rv1 = 1, rv2 = 0");
     print_factor(factor_marginalization(f_ABC, 1), "ABC-1");
     print_factor(factor_marginalization(f_ABC, 2), "ABC-2");
     print_factor(factor_marginalization(f_ABC, 3), "ABC-3");
@@ -70,15 +70,15 @@ int main() {
 
     auto d1_data = xt::xarray<double>{0.5, 0.2, 0.0000001, 0.0000001, 0.3, 0.45};
     d1_data.reshape({3, 2});
-    auto d1_vars = pgmfactors::factor::rv_list{1,2};
-    pgmfactors::factor f_d1(d1_vars,
-                            pgmfactors::factor::data_array(d1_data));;
+    auto d1_vars = pgm::factor::rv_list{1,2};
+    pgm::factor f_d1(d1_vars,
+                            pgm::factor::data_array(d1_data));;
 
     auto d2_data = xt::xarray<double>{0.8, 0.001, 0.6};
     d2_data.reshape({3});
-    auto d2_vars = pgmfactors::factor::rv_list{1};
-    pgmfactors::factor f_d2(d2_vars,
-                            pgmfactors::factor::data_array(d2_data));;
+    auto d2_vars = pgm::factor::rv_list{1};
+    pgm::factor f_d2(d2_vars,
+                            pgm::factor::data_array(d2_data));;
 
     print_factor(factor_division(f_d1, f_d2), "d1/d2");
 
