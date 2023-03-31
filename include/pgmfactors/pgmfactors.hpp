@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PGMFACTORS_PGMFACTORS_HPP
+#define PGMFACTORS_PGMFACTORS_HPP
 
 #include <string>
 #include <vector>
@@ -49,3 +50,4 @@ namespace pgm {
 
 } // namespace pgm
 
+#endif // PGMFACTORS_PGMFACTORS_HPP
