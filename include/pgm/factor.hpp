@@ -1,5 +1,6 @@
-#ifndef PGMFACTORS_PGMFACTORS_HPP
-#define PGMFACTORS_PGMFACTORS_HPP
+#ifndef PGM_FACTOR_HPP
+#define PGM_FACTOR_HPP
+// factor.hpp
 
 #include <string>
 #include <vector>
@@ -50,4 +51,4 @@ namespace pgm {
 
 } // namespace pgm
 
-#endif // PGMFACTORS_PGMFACTORS_HPP
+#endif // PGM_FACTOR_HPP

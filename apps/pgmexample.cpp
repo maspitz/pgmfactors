@@ -7,7 +7,7 @@
 #include <xtensor/xtensor.hpp>
 #include <xtensor/xaxis_iterator.hpp>
 #include <xtensor/xaxis_slice_iterator.hpp>
-#include "pgmfactors/pgmfactors.hpp"
+#include "pgm/factor.hpp"
 
 template<typename T>
 void print_xarray_with_coords(const xt::xarray<T> &xa) {

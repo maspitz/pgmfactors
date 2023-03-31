@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(
-    pgmfactors
+    pgm
     VERSION 0.1.0
-    DESCRIPTION "Probability Factors using the XTensor library"
-    HOMEPAGE_URL "https://github.com/maspitz/pgmfactors"
+    DESCRIPTION "Probability Factors and Graphical Models using the XTensor library"
+    HOMEPAGE_URL "https://github.com/maspitz/pgm"
     LANGUAGES CXX
 )
 
@@ -18,22 +18,22 @@ find_package(xtensor REQUIRED)
 
 # ---- Declare library ----
 
-add_library(pgmfactors_pgmfactors OBJECT source/pgmfactors.cpp)
-target_include_directories(pgmfactors_pgmfactors PUBLIC include /usr/include)
-target_link_libraries(pgmfactors_pgmfactors xtensor)
+add_library(pgm_pgm OBJECT source/factor.cpp)
+target_include_directories(pgm_pgm PUBLIC include /usr/include)
+target_link_libraries(pgm_pgm xtensor)
 
 set_target_properties(
-    pgmfactors_pgmfactors PROPERTIES
+    pgm_pgm PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN YES
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
-    EXPORT_NAME pgmfactors
-    OUTPUT_NAME pgmfactors
+    EXPORT_NAME pgm
+    OUTPUT_NAME pgm
 )
 
 add_executable(pgmexample apps/pgmexample.cpp)
-target_link_libraries(pgmexample xtensor pgmfactors_pgmfactors)
+target_link_libraries(pgmexample xtensor pgm_pgm)
 
 enable_testing()
 
@@ -48,7 +48,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 include(Catch)
 
-add_executable(pgmfactors_test test/pgmfactors_test.cpp)
-target_link_libraries(pgmfactors_test PRIVATE pgmfactors_pgmfactors Catch2::Catch2WithMain)
-catch_discover_tests(pgmfactors_test)
+add_executable(pgmtest test/test_factor.cpp)
+target_link_libraries(pgmtest PRIVATE pgm_pgm Catch2::Catch2WithMain)
+catch_discover_tests(pgmtest)
 

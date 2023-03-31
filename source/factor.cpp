@@ -1,3 +1,4 @@
+// factor.cpp
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -6,7 +7,7 @@
 #include <xtensor/xadapt.hpp>
 #include <xtensor/xstrided_view.hpp>
 
-#include "pgmfactors/pgmfactors.hpp"
+#include "pgm/factor.hpp"
 
 namespace pgm
 {

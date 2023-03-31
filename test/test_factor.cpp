@@ -1,6 +1,6 @@
-// pgmfactors_test.cpp
+// test_factor.cpp
 
-#include "pgmfactors/pgmfactors.hpp"
+#include "pgm/factor.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 
