@@ -4,47 +4,54 @@
 
 #include <string>
 #include <vector>
-// TODO we could forward-declare xt::xarray<value_type> and use unique_ptr<...> to avoid this #include
+// TODO we could forward-declare xt::xarray<value_type> and use unique_ptr<...>
+// to avoid this #include
 #include <xtensor/xarray.hpp>
+
 #include "pgm/rv.hpp"
 
-namespace pgm {
+namespace pgm
+{
 
+// Note: Factor models only discrete factors at this time
+// Class invariants
+//   rv_id is in strictly ascending order
+//   elements of rv_id are not repeated
+class factor
+{
+public:
+  using value_type = double;
+  using rv_list = std::vector<pgm::rv>;
+  using data_array = xt::xarray<value_type>;
 
-  // Note: Factor models only discrete factors at this time
-  // Class invariants
-  //   rv_id is in strictly ascending order
-  //   elements of rv_id are not repeated
-  class factor {
-    public:
-      using value_type = double;
-      using rv_list = std::vector<pgm::rv>;
-      using data_array = xt::xarray<value_type>;
-    private:
-      // TODO consider calling the set of variables the 'scope'. (p.104)
-      rv_list m_rand_vars;
-      xt::xarray<value_type> m_data;
-    public:
-      explicit factor(const rv_list& rand_vars, const data_array& data);
-      auto data() const -> const data_array& { return m_data; }
-      auto vars() const -> const rv_list& { return m_rand_vars; }
-      auto operator==(const factor&) const -> bool = default;
-  };
+private:
+  // TODO consider calling the set of variables the 'scope'. (p.104)
+  rv_list m_rand_vars;
+  xt::xarray<value_type> m_data;
 
-  // Tests if two factors are identical in scope and numerically close in value.
-  // rtol: relative tolerance
-  // atol: absolute tolerance
-  auto is_close(const factor& f_a, const factor& f_b,
-                double rtol = 1e-5, double atol = 1e-8) -> bool;
+public:
+  explicit factor(const rv_list& rand_vars, const data_array& data);
+  auto data() const -> const data_array& { return m_data; }
+  auto vars() const -> const rv_list& { return m_rand_vars; }
+  auto operator==(const factor&) const -> bool = default;
+};
 
+// Tests if two factors are identical in scope and numerically close in value.
+// rtol: relative tolerance
+// atol: absolute tolerance
+auto is_close(const factor& f_a,
+              const factor& f_b,
+              double rtol = 1e-5,
+              double atol = 1e-8) -> bool;
 
-  auto factor_product(const factor& f_a, const factor& f_b) -> factor;
-  auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor;
-  auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -> factor;
-  auto factor_marginalization(const factor& f_a, pgm::rv rv_idx) -> factor;
-  auto factor_division(const factor& f_a, const factor& f_b) -> factor;
+auto factor_product(const factor& f_a, const factor& f_b) -> factor;
+auto factor_reduction(const factor& f_a, const std::map<int, int>& assignment)
+    -> factor;
+auto factor_reduction2(const factor& f_a, const std::map<int, int>& assignment)
+    -> factor;
+auto factor_marginalization(const factor& f_a, pgm::rv rv_idx) -> factor;
+auto factor_division(const factor& f_a, const factor& f_b) -> factor;
 
+}  // namespace pgm
 
-} // namespace pgm
-
-#endif // PGM_FACTOR_HPP
+#endif  // PGM_FACTOR_HPP
