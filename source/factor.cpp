@@ -2,12 +2,14 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <ranges>
 #include <xtensor/xarray.hpp>
 #include <xtensor/xio.hpp>
 #include <xtensor/xadapt.hpp>
 #include <xtensor/xstrided_view.hpp>
 
 #include "pgm/factor.hpp"
+#include "pgm/rv.hpp"
 
 namespace pgm
 {
@@ -18,128 +20,92 @@ namespace pgm
   }
 
 
-auto factor_reduction(const factor& f_a, const std::map<int,int>& assignment) -> factor {
-  auto a_vars = f_a.vars();
-  factor::rv_list b_vars;
+auto factor_reduction(const factor& input, const std::map<pgm::rv,int>& assignments) -> factor {
+  auto input_vars = input.vars();
+  factor::rv_list output_vars;
 
-  xt::xstrided_slice_vector sv;
+  auto it_assignment = assignments.begin();
+  xt::xstrided_slice_vector stride(input_vars.size());
 
-  auto it_avars = a_vars.begin();
-  auto it_x = assignment.begin();
-
-  while(it_avars != a_vars.end() && it_x != assignment.end()) {
-    if (*it_avars > it_x->first) {
-      // assignment rv not in input factor: advance to next assignment rv.
-      it_x++;
-    } else if (*it_avars < it_x->first) {
-      // input factor rv is unassigned: include axis in output factor.
-      sv.push_back(xt::all());
-      b_vars.push_back(*it_avars);
-      it_avars++;
+  for(auto in_var : input_vars) {
+    if (in_var.id() < it_assignment->first.id()) {
+      output_vars.push_back(in_var);
+      stride.push_back(xt::all());
+    } else if (it_assignment->first.id() < in_var.id()) {
+      ++it_assignment;
     } else {
-      // input factor rv is assigned: reduce output factor according to the assignment.
-      sv.push_back(it_x->second);
-      it_avars++;
-      it_x++;
-    }
-  }
-  if (it_avars != a_vars.end()) {
-    // add any remaining unassigned random variables and include their axes.
-    sv.insert(sv.end(), (a_vars.end() - it_avars), xt::all());
-    b_vars.insert(b_vars.end(), it_avars, a_vars.end());
-  }
-  return pgm::factor(b_vars, xt::strided_view(f_a.data(), sv));
-}
-
-
-auto factor_reduction2(const factor& f_a, const std::map<int,int>& assignment) -> factor {
-  auto a_vars = f_a.vars();
-  factor::rv_list b_vars;
-  xt::xstrided_slice_vector sv;
-
-  for(auto avar : a_vars) {
-    if (auto value = assignment.find(avar); value != assignment.end()) {
-      sv.push_back(value->second);
-    }
-    else
-    {
-      b_vars.push_back(avar);
-      sv.push_back(xt::all());
+      stride.push_back(it_assignment->second);
+      ++it_assignment;
     }
   }
 
-  return pgm::factor(b_vars, xt::strided_view(f_a.data(), sv));
+  return pgm::factor(output_vars, xt::strided_view(input.data(), stride));
 }
 
 
 
-auto factor_marginalization(const factor& f_a, int summation_rv) -> factor {
-  auto a_vars = f_a.vars();
-  auto a_rv_it = std::find(a_vars.begin(), a_vars.end(), summation_rv);
-  if (a_rv_it == a_vars.end()) {
-    return f_a;
+auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor {
+  auto input_vars = input.vars();
+  auto a_rv_it = std::find_if(
+    input_vars.begin(), input_vars.end(),
+    [summation_rv](auto var) { return var == summation_rv; });
+  if (a_rv_it == input_vars.end()) {
+    return input;
   }
-  int rv_axis = a_rv_it - a_vars.begin();
-  factor::rv_list b_vars;
-  b_vars.insert(b_vars.end(),a_vars.begin(), a_rv_it);
-  b_vars.insert(b_vars.end(),a_rv_it + 1, a_vars.end());
+  int rv_axis = a_rv_it - input_vars.begin();
+  factor::rv_list output_vars;
+  output_vars.reserve(input_vars.size() - 1);
+  output_vars.insert(output_vars.end(), input_vars.begin(), a_rv_it);
+  output_vars.insert(output_vars.end(), a_rv_it + 1, input_vars.end());
 
-  return pgm::factor(b_vars, xt::sum(f_a.data(), {rv_axis}));
+  return pgm::factor(output_vars, xt::sum(input.data(), {rv_axis}));
 }
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	auto a_vars = f_a.vars();
-	auto a_card = f_a.data().shape();
-
 	auto b_vars = f_b.vars();
-	auto b_card = f_b.data().shape();
 
-	auto product_vars = factor::rv_list{};
-	auto product_card = std::vector<int>{};
-	auto a_reshape = std::vector<int>{};
-	auto b_reshape = std::vector<int>{};
+	std::vector<pgm::rv> product_vars;
+  std::vector<int> a_shape, b_shape;
 
 	// Merge a_vars and b_vars [invariant: strictly ascending order]
 	auto it_avars = a_vars.begin(),	it_bvars = b_vars.begin();
-	auto it_acard = a_card.begin(), it_bcard = b_card.begin();
 
 	// Step through both a_vars and b_vars,
 	// appending the lesser-id variable at each step.
 	while(it_avars != a_vars.end() && it_bvars != b_vars.end()) {
-		if (*it_avars < *it_bvars) {
+		if (it_avars->id() < it_bvars->id()) {
 			product_vars.push_back(*it_avars);
-			product_card.push_back(*it_acard);
-			a_reshape.push_back(*it_acard);
-			b_reshape.push_back(1);
-			++it_avars; ++it_acard;
-		} else if (*it_bvars < *it_avars) {
+			a_shape.push_back(it_avars->card());
+			b_shape.push_back(1);
+			++it_avars;
+		} else if (it_bvars->id() < it_avars->id()) {
 			product_vars.push_back(*it_bvars);
-			product_card.push_back(*it_bcard);
-			a_reshape.push_back(1);
-			b_reshape.push_back(*it_bcard);
-			++it_bvars; ++it_bcard;
+			a_shape.push_back(1);
+			b_shape.push_back(it_bvars->card());
+			++it_bvars;
 		} else {
 			// ASSERT(*it_acard == *it_bcard);
 			product_vars.push_back(*it_avars);
-			product_card.push_back(*it_acard);
-			a_reshape.push_back(*it_acard);
-			b_reshape.push_back(*it_acard);
-			++it_avars; ++it_acard;
-			++it_bvars; ++it_bcard;
+			a_shape.push_back(it_avars->card());
+			b_shape.push_back(it_avars->card());
+			++it_avars;
+			++it_bvars;
 		}
 	}
-	if (it_avars != a_vars.end()) {
+	while (it_avars != a_vars.end()) {
 	// Add any remaining elements from a_vars
-		product_vars.insert(product_vars.end(), it_avars, a_vars.end());
-		product_card.insert(product_card.end(), it_acard, a_card.end());
-		a_reshape.insert(a_reshape.end(), it_acard, a_card.end());
-		b_reshape.insert(b_reshape.end(), (a_card.end() - it_acard), 1);
-	} else if (it_bvars != b_vars.end()) {
+    product_vars.push_back(*it_avars);
+    a_shape.push_back(it_avars->card());
+    b_shape.push_back(1);
+    ++it_avars;
+	}
+  while (it_bvars != b_vars.end()) {
 	// Add any remaining elements from b_vars
-		product_vars.insert(product_vars.end(), it_bvars, b_vars.end());
-		product_card.insert(product_card.end(), it_bcard, b_card.end());
-		b_reshape.insert(b_reshape.end(), it_bcard, b_card.end());
-		a_reshape.insert(a_reshape.end(), (b_card.end() - it_bcard), 1);
+    product_vars.push_back(*it_bvars);
+    a_shape.push_back(1);
+    b_shape.push_back(it_bvars->card());
+    ++it_bvars;
 	}
 
 	// make factor data views using a_reshape and b_reshape
@@ -147,45 +113,45 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor {
 	// return the product factor constructed from the
 	// product_vars and product_data
 
-  auto view_a = xt::reshape_view(f_a.data(), a_reshape);
-  auto view_b = xt::reshape_view(f_b.data(), b_reshape);
+  auto view_a = xt::reshape_view(f_a.data(), a_shape);
+  auto view_b = xt::reshape_view(f_b.data(), b_shape);
   return factor(product_vars, view_a * view_b);
 }
 
 
 auto factor_division(const factor& f_a, const factor& f_b) -> factor {
 	auto a_vars = f_a.vars();
-	auto a_card = f_a.data().shape();
-
 	auto b_vars = f_b.vars();
-	auto b_card = f_b.data().shape();
 
-	auto b_reshape = std::vector<int>{};
+	auto b_shape = std::vector<int>{};
 
 	// Merge a_vars and b_vars [invariant: strictly ascending order]
 	auto it_avars = a_vars.begin(),	it_bvars = b_vars.begin();
-	auto it_bcard = b_card.begin();
 
 	// Step through both a_vars and b_vars,
 	// appending the lesser-id variable at each step.
-	while(it_avars != a_vars.end()) {
-		if (*it_avars < *it_bvars) {
-			b_reshape.push_back(1);
+	while(it_avars != a_vars.end() && it_bvars != b_vars.end()) {
+		if (it_avars->id() < it_bvars->id()) {
+			b_shape.push_back(1);
 			++it_avars;
-		} else if (*it_bvars < *it_avars) {
+		} else if (it_bvars->id() < it_avars->id()) {
+      std::cerr << it_bvars->id() << " < " << it_avars->id() << std::endl;
       throw std::runtime_error("Scope mismatch: some variable in f_b is not present in f_a");
 		} else {
-      b_reshape.push_back(*it_bcard);
+      b_shape.push_back(it_bvars->card());
       ++it_avars;
       ++it_bvars;
-      ++it_bcard;
 		}
 	}
+  while (it_avars != a_vars.end()) {
+    b_shape.push_back(1);
+    ++it_avars;
+  }
   if (it_bvars != b_vars.end()) {
       throw std::runtime_error("Scope mismatch: some variable in f_b is not present in f_a");
   }
 
-  auto view_b = xt::reshape_view(f_b.data(), b_reshape);
+  auto view_b = xt::reshape_view(f_b.data(), b_shape);
   // TODO: handle the case of 0 / 0, in which we are to take the relaxed view
   // that 0 / 0 should be taken to yield 0.
   return factor(a_vars, f_a.data() / view_b);
@@ -201,7 +167,7 @@ auto find_permutation_indices(const factor::rv_list& rvs) -> std::vector<unsigne
   using index_pair = std::pair<unsigned int, unsigned int>;
   std::vector<index_pair> indexed_input;
   for (unsigned int i = 0; i < rvs.size(); i++) {
-    indexed_input.emplace_back(rvs[i], i);
+    indexed_input.emplace_back(rvs[i].id(), i);
   }
 
   // Sort the vector of pairs by the element value
@@ -220,26 +186,26 @@ auto find_permutation_indices(const factor::rv_list& rvs) -> std::vector<unsigne
   return permutation_indices;
 }
 
-
-factor::factor(const factor::rv_list &rand_vars, const factor::data_array &data) {
+factor::factor(const factor::rv_list &rand_vars, const factor::data_array& data) {
 
 // TODO check precondition on cardinality of data
 // throw exception if length(data) != product(lengths(rand_vars))
 
-  if (std::is_sorted(rand_vars.begin(),
-                       rand_vars.end(),
-                       [](auto a, auto b) -> bool { return a <= b; })) {
-    m_data = xt::xarray<value_type>(data);
-    m_rand_vars = rand_vars;
-  }
-  else
+  m_rand_vars = rand_vars;
+  std::vector<int> shape;
+  std::transform(rand_vars.begin(), rand_vars.end(), std::back_inserter(shape),
+                 [](auto v) {return v.card();});
+  m_data = xt::xarray<value_type>(data);
+  m_data.reshape(shape);
+  if (!std::is_sorted(m_rand_vars.begin(),
+                       m_rand_vars.end(),
+                       [](auto a, auto b) -> bool { return a.id() <= b.id(); }))
   {
     auto perms = find_permutation_indices(rand_vars);
-    m_data = xt::transpose(data, perms);
-    m_rand_vars = rand_vars;
+    m_data = xt::transpose(m_data, perms);
     std::sort(m_rand_vars.begin(),
               m_rand_vars.end(),
-              [](auto a, auto b) -> bool { return a < b; });
+              [](auto a, auto b) -> bool { return a.id() < b.id(); });
     // TODO throw exception if a rand var id is repeated.
   }
 
