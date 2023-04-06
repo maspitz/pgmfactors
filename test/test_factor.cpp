@@ -15,7 +15,14 @@ TEST_CASE("Factor Construction") {
     CHECK_NOTHROW(pgm::factor(pgm::factor::rv_list {rv_B, rv_C},
                               {{0.5, 0.8, 0.1, 0.0}}));
   }
+  SECTION("A factor's scope does not permit repeated random variables")
+  {
+    CHECK_THROWS(pgm::factor(pgm::factor::rv_list {rv_B, rv_B},
+                              {{0.5, 0.8, 0.1, 0.0}}));
+  }
+
 }
+
 
 TEST_CASE("Factor Equality Operation")
 {
@@ -44,6 +51,7 @@ TEST_CASE("Factor Equality Operation")
 
   REQUIRE(f_AB != f_AB_vars_tweaked);
 }
+
 
 TEST_CASE("Factor Index Sorting")
 {
