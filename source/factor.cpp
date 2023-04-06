@@ -197,6 +197,14 @@ factor::factor(const factor::rv_list& rand_vars, const factor::data_array& data)
 {
   // TODO check precondition on cardinality of data
   // throw exception if length(data) != product(lengths(rand_vars))
+  int dimension_product = 1;
+  for (auto r : rand_vars) {
+    dimension_product *= r.card();
+  }
+  if (data.size() != dimension_product) {
+    throw std::runtime_error(
+      "Cardinality of scope variables does not match size of provided factor data.");
+  }
 
   m_rand_vars = rand_vars;
   std::vector<int> shape;
