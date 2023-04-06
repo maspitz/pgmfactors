@@ -1,8 +1,21 @@
 // test_factor.cpp
 
+#include <stdexcept>
 #include <catch2/catch_test_macros.hpp>
 
 #include "pgm/factor.hpp"
+
+TEST_CASE("Factor Construction") {
+  pgm::rv rv_A(3), rv_B(2), rv_C(2);
+  SECTION("The size of a factor's data corresponds to cardinality of its scope variables")
+  {
+    CHECK_THROWS_AS(pgm::factor(pgm::factor::rv_list {rv_B, rv_C},
+                                {{0.5, 0.8, 0.1, 0.0, 0.3, 0.9}}),
+                    std::runtime_error);
+    CHECK_NOTHROW(pgm::factor(pgm::factor::rv_list {rv_B, rv_C},
+                              {{0.5, 0.8, 0.1, 0.0}}));
+  }
+}
 
 TEST_CASE("Factor Equality Operation")
 {
