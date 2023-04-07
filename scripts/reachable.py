@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
+from enum import Enum
 
-def reachable(G, X, Z):
-    """Returns set of nodes reachable from X given Z via active trails, for Bayes Net G.
+class Direction(Enum):
+    UP = 1
+    DOWN = 2
 
-    G: Graph of Bayes Net
-    X: Source Random Variable
-    Z: Observation Random Variables
 
 class Digraph:
     """A simple directed graph."""
@@ -56,6 +55,35 @@ def ancestors(G, X):
 
     return ancestors
 
+
+def reachable(G, source, observations):
+    """Returns the set of nodes reachable via active trails from a source given a list of observations, for Bayes Net G.
+
+    G: Digraph of Bayes Net
+    source: Source node in G
+    observations: List of Observation nodes in G
+
+    See page 75 of Koller and Friedman, Probabilistic Graphical Models: Principles and Techniques
     """
 
-    pass
+    source_ancestors = ancestors(G, source)
+
+    to_visit = {(source, Direction.UP)}
+    visited = set()
+    reachable_nodes = set()
+
+    while to_visit:
+        node, the_dir = to_visit.pop()
+        if (node, the_dir) not in visited:
+            visited.add((node, the_dir))
+            if node not in observations:
+                reachable_nodes.add(node)
+            if the_dir is Direction.UP and node not in observations:
+                to_visit |= {(p, Direction.UP) for p in G.parents(node)}
+                to_visit |= {(c, Direction.DOWN) for c in G.children(node)}
+            elif the_dir is Direction.DOWN:
+                if node not in observations:
+                    to_visit |= {(c, Direction.DOWN) for c in G.children(node)}
+                if node in source_ancestors:
+                    to_visit |= {(p, Direction.UP) for p in G.parents(node)}
+    return reachable_nodes
