@@ -41,6 +41,21 @@ class Digraph:
         """Returns the children of the node."""
         return self.forward_edges[node]
 
+
+def ancestors(G, X):
+    """Returns the ancestors of node X in Digraph G.  Includes X itself."""
+
+    nodes_to_visit = {X}
+    ancestors = set()
+
+    while nodes_to_visit:
+        node = nodes_to_visit.pop()
+        if node not in ancestors:
+            nodes_to_visit |= G.parents(node)
+            ancestors.add(node)
+
+    return ancestors
+
     """
 
     pass
