@@ -24,7 +24,7 @@ auto is_close(const factor& f_a, const factor& f_b, double rtol, double atol)
 }
 
 auto factor_reduction(const factor& input,
-                      const std::map<pgm::rv, int>& assignments) -> factor
+                      const pgm::rv_evidence& assignments) -> factor
 {
   auto input_vars = input.vars();
   factor::rv_list output_vars;

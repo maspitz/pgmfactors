@@ -45,11 +45,9 @@ auto is_close(const factor& f_a,
               double atol = 1e-8) -> bool;
 
 auto factor_product(const factor& f_a, const factor& f_b) -> factor;
-auto factor_reduction(const factor& f_a, const std::map<int, int>& assignment)
+auto factor_reduction(const factor& input, const pgm::rv_evidence& assignments)
     -> factor;
-auto factor_reduction2(const factor& f_a, const std::map<int, int>& assignment)
-    -> factor;
-auto factor_marginalization(const factor& f_a, pgm::rv rv_idx) -> factor;
+auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor;
 auto factor_division(const factor& f_a, const factor& f_b) -> factor;
 
 }  // namespace pgm
