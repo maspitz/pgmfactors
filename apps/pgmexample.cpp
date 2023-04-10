@@ -68,6 +68,12 @@ int main()
   print_factor(f_d2, "d2");
   print_factor(factor_division(f_d1, f_d2), "d1/d2");
 
+  std::cout << "ABC reduced by evidence C = 0" << std::endl;
+  pgm::rv_evidence C1_evidence;
+  C1_evidence[rv_C] = 0;
+  auto f_ABC_C1 = pgm::factor_reduction(f_ABC, C1_evidence);
+  print_factor(f_ABC_C1);
+
   std::cout << "Study group misconception example:" << std::endl;
 
   pgm::rv A(2), B(2), C(2), D(2);
