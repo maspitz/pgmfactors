@@ -24,6 +24,14 @@ public:
   bool operator==(const rv& other) const { return this->id() == other.id(); }
 };
 
+struct rv_id_comparison {
+    bool operator()(const pgm::rv& lhs, const pgm::rv& rhs) const {
+        return lhs.id() < rhs.id();
+    }
+};
+
+using rv_evidence = std::map<pgm::rv, int, rv_id_comparison>;
+
 }  // namespace pgm
 
 #endif  // RV_H_
