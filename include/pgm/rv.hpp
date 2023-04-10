@@ -2,6 +2,8 @@
 #define RV_H_
 // rv.hpp
 
+#include <map>
+
 namespace pgm
 {
 
