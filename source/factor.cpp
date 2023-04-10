@@ -30,7 +30,7 @@ auto factor_reduction(const factor& input,
   factor::rv_list output_vars;
 
   auto it_assignment = assignments.begin();
-  xt::xstrided_slice_vector stride(input_vars.size());
+  xt::xstrided_slice_vector stride;
 
   for (auto in_var : input_vars) {
     if (in_var.id() < it_assignment->first.id()) {
