@@ -79,17 +79,10 @@ TEST_CASE("Factor Product", "[factor][operation]")
   auto rv_B = pgm::rv {2};
   auto rv_C = pgm::rv {2};
 
-  auto AB_data = xt::xarray<double> {0.5, 0.8, 0.1, 0.0, 0.3, 0.9};
-  AB_data.reshape({3, 2});
-  auto AB_vars = pgm::factor::rv_list {rv_A, rv_B};
-  pgm::factor f_AB(AB_vars, pgm::factor::data_array(AB_data));
-  ;
-
-  auto BC_data = xt::xarray<double> {0.5, 0.7, 0.1, 0.2};
-  BC_data.reshape({2, 2});
-  auto BC_vars = pgm::factor::rv_list {rv_B, rv_C};
-  pgm::factor f_BC(BC_vars, pgm::factor::data_array(BC_data));
-  ;
+  pgm::factor f_AB(pgm::factor::rv_list {rv_A, rv_B},
+                   {{0.5, 0.8, 0.1, 0.0, 0.3, 0.9}});
+  pgm::factor f_BC(pgm::factor::rv_list {rv_B, rv_C},
+                   {{0.5, 0.7, 0.1, 0.2}});
 
   SECTION("Product of factors sharing one variable")
   {
