@@ -222,6 +222,12 @@ factor::factor(const factor::rv_list& rand_vars, const factor::data_array& data)
     std::sort(m_rand_vars.begin(), m_rand_vars.end(), pgm::rv_id_comparison());
   }
 
+  if (std::adjacent_find(
+          m_rand_vars.begin(), m_rand_vars.end(), pgm::rv_id_equality())
+      != m_rand_vars.end())
+  {
+    throw std::runtime_error(
+        "A factor's scope should not have duplicate random variables.");
   }
 }
 
