@@ -112,3 +112,31 @@ TEST_CASE("Factor Product", "[factor][operation]")
     REQUIRE(is_close(calculated_self_product, expected_self_product));
   }
 }
+
+TEST_CASE("Factor Reduction", "[factor][operation]")
+{
+  auto rv_A = pgm::rv {3};
+  auto rv_B = pgm::rv {2};
+  auto rv_C = pgm::rv {2};
+
+  pgm::factor f_AB(pgm::factor::rv_list {rv_A, rv_B},
+                   {{0.5, 0.8, 0.1, 0.0, 0.3, 0.9}});
+  pgm::factor f_BC(pgm::factor::rv_list {rv_B, rv_C},
+                   {{0.5, 0.7, 0.1, 0.2}});
+
+  auto f_ABC = pgm::factor_product(f_AB, f_BC);
+
+  SECTION("Reduction by evidence C = 0")
+  {
+    pgm::rv_evidence C1_evidence;
+    C1_evidence[rv_C] = 0;
+
+    auto calculated_reduction = pgm::factor_reduction(f_ABC, C1_evidence);
+
+    auto expected_vars = pgm::factor::rv_list {rv_A, rv_B};
+    auto expected_data = xt::xarray<double> {0.25, 0.08, 0.05, 0.00, 0.15, 0.09};
+    auto expected_reduction =
+        pgm::factor(expected_vars, pgm::factor::data_array(expected_data));
+    REQUIRE(is_close(calculated_reduction, expected_reduction));
+  }
+}
