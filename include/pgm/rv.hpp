@@ -32,6 +32,12 @@ struct rv_id_comparison {
     }
 };
 
+struct rv_id_equality {
+    bool operator()(const pgm::rv& lhs, const pgm::rv& rhs) const {
+        return lhs.id() == rhs.id();
+    }
+};
+
 using rv_evidence = std::map<pgm::rv, int, rv_id_comparison>;
 
 }  // namespace pgm
