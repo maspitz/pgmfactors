@@ -214,16 +214,14 @@ factor::factor(const factor::rv_list& rand_vars, const factor::data_array& data)
                  [](auto v) { return v.card(); });
   m_data = xt::xarray<value_type>(data);
   m_data.reshape(shape);
-  if (!std::is_sorted(m_rand_vars.begin(),
-                      m_rand_vars.end(),
-                      [](auto a, auto b) -> bool { return a.id() <= b.id(); }))
+  if (!std::is_sorted(
+          m_rand_vars.begin(), m_rand_vars.end(), pgm::rv_id_comparison()))
   {
     auto perms = find_permutation_indices(rand_vars);
     m_data = xt::transpose(m_data, perms);
-    std::sort(m_rand_vars.begin(),
-              m_rand_vars.end(),
-              [](auto a, auto b) -> bool { return a.id() < b.id(); });
-    // TODO throw exception if a rand var id is repeated.
+    std::sort(m_rand_vars.begin(), m_rand_vars.end(), pgm::rv_id_comparison());
+  }
+
   }
 }
 
