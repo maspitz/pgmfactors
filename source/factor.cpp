@@ -23,8 +23,8 @@ auto is_close(const factor& f_a, const factor& f_b, double rtol, double atol)
       && (xt::allclose(f_a.data(), f_b.data(), rtol, atol));
 }
 
-auto factor_reduction(const factor& input,
-                      const pgm::rv_evidence& assignments) -> factor
+auto factor_reduction(const factor& input, const pgm::rv_evidence& assignments)
+    -> factor
 {
   auto input_vars = input.vars();
   factor::rv_list output_vars;
