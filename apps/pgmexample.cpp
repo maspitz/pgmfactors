@@ -39,8 +39,29 @@ void print_factor(const pgm::factor& f, std::string_view name = "")
   std::cout << std::flush;
 }
 
-int main()
-{
+
+void example_misconception() {
+  std::cout << "Study group misconception example:" << std::endl;
+
+  pgm::rv A(2), B(2), C(2), D(2);
+  pgm::factor phi1(pgm::factor::rv_list {A, B},
+                   {{30, 5, 1, 10}});
+  pgm::factor phi2(pgm::factor::rv_list {B, C},
+                   {{100, 1, 1, 100}});
+  pgm::factor phi3(pgm::factor::rv_list {C, D},
+                   {{1, 100, 100, 1}});
+  pgm::factor phi4(pgm::factor::rv_list {D, A},
+                   {{100, 1, 1, 100}});
+
+  auto phi12 = pgm::factor_product(phi1, phi2);
+  auto phi34 = pgm::factor_product(phi3, phi4);
+  auto phi1234 = pgm::factor_product(phi12, phi34);
+
+  print_factor(phi1234, "phi1234");
+}
+
+
+void example_factor_operations() {
   pgm::rv rv_A(3), rv_B(2), rv_C(2);
   pgm::factor f_AB(pgm::factor::rv_list {rv_A, rv_B},
                    {{0.5, 0.8, 0.1, 0.0, 0.3, 0.9}});
@@ -73,23 +94,14 @@ int main()
   C1_evidence[rv_C] = 0;
   auto f_ABC_C1 = pgm::factor_reduction(f_ABC, C1_evidence);
   print_factor(f_ABC_C1);
+}
 
-  std::cout << "Study group misconception example:" << std::endl;
 
-  pgm::rv A(2), B(2), C(2), D(2);
-  pgm::factor phi1(pgm::factor::rv_list {A, B},
-                   {{30, 5, 1, 10}});
-  pgm::factor phi2(pgm::factor::rv_list {B, C},
-                   {{100, 1, 1, 100}});
-  pgm::factor phi3(pgm::factor::rv_list {C, D},
-                   {{1, 100, 100, 1}});
-  pgm::factor phi4(pgm::factor::rv_list {D, A},
-                   {{100, 1, 1, 100}});
 
-  auto phi12 = pgm::factor_product(phi1, phi2);
-  auto phi34 = pgm::factor_product(phi3, phi4);
-  auto phi1234 = pgm::factor_product(phi12, phi34);
 
-  print_factor(phi1234, "phi1234");
+int main()
+{
+  example_factor_operations();
+  example_misconception();
   return 0;
 }
