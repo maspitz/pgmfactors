@@ -3,6 +3,8 @@
 #include <map>
 #include <string_view>
 
+#include <numeric>  // for std::reduce()
+
 #include <xtensor/xarray.hpp>
 #include <xtensor/xaxis_iterator.hpp>
 #include <xtensor/xaxis_slice_iterator.hpp>
@@ -97,11 +99,47 @@ void example_factor_operations() {
 }
 
 
+// TODO: consider taking std::vector<std::reference_wrapper<pgm::factor>> as the argument.
+// or for that matter, begin/end iterators that yield reference wrappers.
+pgm::factor factor_joint_product(const std::vector<pgm::factor const *> f) {
+/*  return std::reduce(f.begin(), f.end(), [](pgm::factor const * a,
+    pgm::factor const * b){return pgm::factor_product(*a, *b);});*/
+  auto it = f.begin();
+  auto jpd = **it;
+  it++;
+  while(it != f.end()) {
+    jpd = pgm::factor_product(jpd, **it);
+    it++;
+  }
+  return jpd;
+}
+
+
+// sum-product variable elimination
+void example_sum_product_ve() {
+  pgm::rv D(2), I(2), G(3), S(2), L(2);
+  pgm::factor f_D(pgm::factor::rv_list {D}, {{0.6, 0.4}});
+  pgm::factor f_I(pgm::factor::rv_list {I}, {{0.7, 0.3}});
+  pgm::factor f_G(pgm::factor::rv_list {I, D, G},
+                  {{0.3, 0.4, 0.3, 0.05, 0.25, 0.7,
+                     0.9, 0.08, 0.02, 0.5, 0.3, 0.2}});
+  pgm::factor f_S(pgm::factor::rv_list {I, S},
+                  {{0.95, 0.05, 0.2, 0.8}});
+  pgm::factor f_L(pgm::factor::rv_list {G, L},
+                  {{0.1, 0.9, 0.4, 0.6, 0.99, 0.01}});
+  // first, demonstrate inefficient inference using the full joint product:
+  auto student_jpd = factor_joint_product(std::vector<pgm::factor const *>{
+      &f_D, &f_I, &f_G, &f_S, &f_L
+    });
+  print_factor(student_jpd);
+  // TODO: marginalize student_jpd to query cpds...
+}
 
 
 int main()
 {
   example_factor_operations();
   example_misconception();
+  example_sum_product_ve();
   return 0;
 }
