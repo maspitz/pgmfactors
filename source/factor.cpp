@@ -94,23 +94,23 @@ template <class InputIterator1, class InputIterator2,
                     Compare comp) {
   while(first1 != last1 && first2 != last2) {
     if (comp(*first1, *first2)) {
-      only_1(*first1);
+      only_1(first1);
       ++first1;
     } else if (comp(*first2, *first1)) {
-      only_2(*first2);
+      only_2(first2);
       ++first2;
     } else {
-      both_1_and_2(*first1);
+      both_1_and_2(first1);
       ++first1;
       ++first2;
     }
   }
   while(first1 != last1) {
-    only_1(*first1);
+    only_1(first1);
     ++first1;
   }
   while(first2 != last2) {
-    only_2(*first2);
+    only_2(first2);
     ++first2;
   }
 }
@@ -125,9 +125,9 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
 
   venn_action(a_vars.begin(), a_vars.end(),
               b_vars.begin(), b_vars.end(),
-              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(v.card()); b_shape.push_back(1); },
-              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(1); b_shape.push_back(v.card()); },
-              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(v.card()); b_shape.push_back(v.card()); },
+              [&](auto v) { product_vars.push_back(*v); a_shape.push_back(v->card()); b_shape.push_back(1); },
+              [&](auto v) { product_vars.push_back(*v); a_shape.push_back(1); b_shape.push_back(v->card()); },
+              [&](auto v) { product_vars.push_back(*v); a_shape.push_back(v->card()); b_shape.push_back(v->card()); },
               pgm::rv_id_comparison());
 
   auto view_a = xt::reshape_view(f_a.data(), a_shape);
@@ -149,9 +149,9 @@ auto factor_reduction2(const factor& input, const pgm::rv_evidence& assignments)
 
   venn_action(input_vars.begin(), input_vars.end(),
               assignment_vars.begin(), assignment_vars.end(),
-              [&](pgm::rv v) { output_vars.push_back(v); stride.push_back(xt::all()); },
-              [&](pgm::rv v) { return; },
-              [&](pgm::rv v) { stride.push_back(assignments.at(v)); },
+              [&](auto v) { output_vars.push_back(*v); stride.push_back(xt::all()); },
+              [&](auto v) { return; },
+              [&](auto v) { stride.push_back(assignments.at(*v)); },
               pgm::rv_id_comparison());
 
   return pgm::factor(output_vars, xt::strided_view(input.data(), stride));
