@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <ranges>
 
 #include "pgm/factor.hpp"
 
@@ -134,6 +135,27 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
   return factor(product_vars, view_a * view_b);
 }
 
+// factor_reduction2 is an alternative, unexported implementation of factor_reduction.
+// It should behave identically, but it uses venn_action internally.
+// Its main drawback is that it uses std::map<>::at() because venn_action only iterates
+// over keys of the rv_evidence map, not key-value pairs.  Still, it may be useful in the future.
+auto factor_reduction2(const factor& input, const pgm::rv_evidence& assignments)
+    -> factor
+{
+  auto input_vars = input.vars();
+  auto assignment_vars = std::views::keys(assignments);
+  factor::rv_list output_vars;
+  xt::xstrided_slice_vector stride;
+
+  venn_action(input_vars.begin(), input_vars.end(),
+              assignment_vars.begin(), assignment_vars.end(),
+              [&](pgm::rv v) { output_vars.push_back(v); stride.push_back(xt::all()); },
+              [&](pgm::rv v) { return; },
+              [&](pgm::rv v) { stride.push_back(assignments.at(v)); },
+              pgm::rv_id_comparison());
+
+  return pgm::factor(output_vars, xt::strided_view(input.data(), stride));
+}
 
 auto factor_division(const factor& f_a, const factor& f_b) -> factor
 {
