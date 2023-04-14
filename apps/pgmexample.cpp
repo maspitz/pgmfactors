@@ -4,6 +4,8 @@
 #include <string_view>
 
 #include <numeric>  // for std::reduce()
+#include <ranges>   // for std::views::keys
+#include <algorithm>  // for std::set_difference
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xaxis_iterator.hpp>
@@ -112,6 +114,29 @@ pgm::factor factor_joint_product(const std::vector<pgm::factor const *> f) {
     it++;
   }
   return jpd;
+}
+
+pgm::factor naive_cpd_inference(const pgm::factor& jpd,
+                                const pgm::rv_evidence& query,
+                                const pgm::rv_evidence& evidence) {
+  // apply evidence (i.e., project on relevant axes)
+  auto f = pgm::factor_reduction(jpd, evidence);
+
+  // marginalize (i.e., sum on all but the query var axes)
+
+  std::vector<pgm::rv> margin_vars;
+  auto query_vars = std::views::keys(query);
+  std::set_difference(jpd.vars().begin(), jpd.vars().end(),
+                      query_vars.begin(), query_vars.end(),
+                      std::back_inserter(margin_vars),
+                      pgm::rv_id_comparison());
+  f = pgm::factor_marginalization(f, margin_vars);
+
+  // normalize
+  f = pgm::factor_normalization(f);
+
+  // return query
+  return pgm::factor_reduction(f, query);
 }
 
 
