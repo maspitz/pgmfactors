@@ -76,12 +76,20 @@ auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor
   return pgm::factor(output_vars, xt::sum(input.data(), {rv_axis}));
 }
 
-template <class InputIterator1, class InputIterator2, class Compare>
+
+// venn_action() takes two sorted ranges and acts with the given functions on their elements.
+//
+// The idea is to call Function1 and Function2 on the appropriate set differences
+// and Function12 on the intersection.
+//
+// The return value of these functions is irrelevant.  Only their side effects matter.
+template <class InputIterator1, class InputIterator2,
+          class Function1, class Function2, class Function12, class Compare>
   void venn_action (InputIterator1 first1, InputIterator1 last1,
                     InputIterator2 first2, InputIterator2 last2,
-                    auto &&only_1,
-                    auto &&only_2,
-                    auto &&both_1_and_2,
+                    Function1 only_1,
+                    Function2 only_2,
+                    Function12 both_1_and_2,
                     Compare comp) {
   while(first1 != last1 && first2 != last2) {
     if (comp(*first1, *first2)) {
