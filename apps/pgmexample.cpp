@@ -156,32 +156,50 @@ void example_sum_product_ve() {
   auto student_jpd = factor_joint_product(std::vector<pgm::factor const *>{
       &f_D, &f_I, &f_G, &f_S, &f_L
     });
-  pgm::rv_evidence example_specification;
-  example_specification[I] = 1;
-  example_specification[D] = 0;
-  example_specification[G] = 1; // note: in text, Val(G) = {1, 2, 3}.  So 1 represents 2.
-  example_specification[S] = 1;
-  example_specification[L] = 0;
-  auto zz = factor_reduction(student_jpd, example_specification);
-  print_factor(zz, "full evidence");
 
-  auto PL = factor_marginalization(student_jpd, I);
-  PL = factor_marginalization(PL, D);
-  PL = factor_marginalization(PL, G);
-  PL = factor_marginalization(PL, S);
-  print_factor(PL, "PL");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1},{D,0},{G,1},{S,1},{L,0}}, {}),
+      "P(i1,d0,g2,s1,l0) ~ 0.004608");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{L,1}}, {}),
+      "P(l1) ~ 0.502");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{L,1}}, {{I,0}}),
+      "P(l1 | i0) ~ 0.389");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{L,1}}, {{I,0},{D,0}}),
+      "P(l1 | i0, d0) ~ 0.513");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{G,2}}),
+      "P(i1 | g3) ~ 0.079");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{D,1}}, {}),
+      "P(d1) = 0.400");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{D,1}}, {{G,2}}),
+      "P(d1 | g3) ~ 0.629");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{L,0}}),
+      "P(i1 | l0) ~ 0.14");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{L,0},{G,2}}),
+      "P(i1 | l0, g3) ~ 0.079");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{S,1},{G,2}}),
+      "P(i1 | s1, g3) ~ 0.578");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{D,1}}, {{S,1},{G,2}}),
+      "P(d1 | s1, g3) ~ 0.76");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{G,2},{D,1}}),
+      "P(i1 | g3, d1) ~ 0.11");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{G,1}}),
+      "P(i1 | g2) ~ 0.175");
+    print_factor(
+      naive_cpd_inference(student_jpd, {{I,1}}, {{G,1},{D,1}}),
+      "P(i1 | g2, d1) ~ 0.34");
 
-  pgm::rv_evidence foo;
-  foo[I] = 0;
-  //auto PLi0 = factor_reduction(student_jpd, pgm::rv_evidence{{I, 0}});
-  auto PLi0 = factor_reduction(student_jpd, foo);
-  PLi0 = factor_marginalization(PLi0, D);
-  PLi0 = factor_marginalization(PLi0, G);
-  PLi0 = factor_marginalization(PLi0, S);
-//  print_factor(student_jpd);
-  print_factor(PLi0, "PL | i0");
-
-  // TODO: marginalize student_jpd to query cpds...
 }
 
 
