@@ -28,20 +28,31 @@ auto factor_reduction(const factor& input, const pgm::rv_evidence& assignments)
 {
   auto input_vars = input.vars();
   factor::rv_list output_vars;
-
-  auto it_assignment = assignments.begin();
   xt::xstrided_slice_vector stride;
 
-  for (auto in_var : input_vars) {
-    if (in_var.id() < it_assignment->first.id()) {
-      output_vars.push_back(in_var);
+  auto it_assignment = assignments.begin();
+  auto it_input_var = input_vars.begin();
+
+  while (it_input_var != input_vars.end() &&
+         it_assignment != assignments.end()) {
+    auto assignment_id = it_assignment->first.id();
+    auto in_var_id = it_input_var->id();
+    if (in_var_id < assignment_id) {
+      output_vars.push_back(*it_input_var);
       stride.push_back(xt::all());
-    } else if (it_assignment->first.id() < in_var.id()) {
+      ++it_input_var;
+    } else if (in_var_id > assignment_id) {
       ++it_assignment;
     } else {
       stride.push_back(it_assignment->second);
+      ++it_input_var;
       ++it_assignment;
     }
+  }
+  while (it_input_var != input_vars.end()) {
+    output_vars.push_back(*it_input_var);
+    stride.push_back(xt::all());
+    ++it_input_var;
   }
 
   return pgm::factor(output_vars, xt::strided_view(input.data(), stride));
