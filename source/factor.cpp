@@ -129,11 +129,6 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
               [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(v.card()); b_shape.push_back(v.card()); },
               pgm::rv_id_comparison());
 
-  // make factor data views using a_reshape and b_reshape
-  // multiply the views to obtain the product_data
-  // return the product factor constructed from the
-  // product_vars and product_data
-
   auto view_a = xt::reshape_view(f_a.data(), a_shape);
   auto view_b = xt::reshape_view(f_b.data(), b_shape);
   return factor(product_vars, view_a * view_b);
