@@ -76,6 +76,36 @@ auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor
   return pgm::factor(output_vars, xt::sum(input.data(), {rv_axis}));
 }
 
+template <class InputIterator1, class InputIterator2, class Compare>
+  void venn_action (InputIterator1 first1, InputIterator1 last1,
+                    InputIterator2 first2, InputIterator2 last2,
+                    auto &&only_1,
+                    auto &&only_2,
+                    auto &&both_1_and_2,
+                    Compare comp) {
+  while(first1 != last1 && first2 != last2) {
+    if (comp(*first1, *first2)) {
+      only_1(*first1);
+      ++first1;
+    } else if (comp(*first2, *first1)) {
+      only_2(*first2);
+      ++first2;
+    } else {
+      both_1_and_2(*first1);
+      ++first1;
+      ++first2;
+    }
+  }
+  while(first1 != last1) {
+    only_1(*first1);
+    ++first1;
+  }
+  while(first2 != last2) {
+    only_2(*first2);
+    ++first2;
+  }
+}
+
 auto factor_product(const factor& f_a, const factor& f_b) -> factor
 {
   auto a_vars = f_a.vars();
@@ -84,45 +114,12 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
   std::vector<pgm::rv> product_vars;
   std::vector<int> a_shape, b_shape;
 
-  // Merge a_vars and b_vars [invariant: strictly ascending order]
-  auto it_avars = a_vars.begin(), it_bvars = b_vars.begin();
-
-  // Step through both a_vars and b_vars,
-  // appending the lesser-id variable at each step.
-  while (it_avars != a_vars.end() && it_bvars != b_vars.end()) {
-    if (it_avars->id() < it_bvars->id()) {
-      product_vars.push_back(*it_avars);
-      a_shape.push_back(it_avars->card());
-      b_shape.push_back(1);
-      ++it_avars;
-    } else if (it_bvars->id() < it_avars->id()) {
-      product_vars.push_back(*it_bvars);
-      a_shape.push_back(1);
-      b_shape.push_back(it_bvars->card());
-      ++it_bvars;
-    } else {
-      // ASSERT(*it_acard == *it_bcard);
-      product_vars.push_back(*it_avars);
-      a_shape.push_back(it_avars->card());
-      b_shape.push_back(it_avars->card());
-      ++it_avars;
-      ++it_bvars;
-    }
-  }
-  while (it_avars != a_vars.end()) {
-    // Add any remaining elements from a_vars
-    product_vars.push_back(*it_avars);
-    a_shape.push_back(it_avars->card());
-    b_shape.push_back(1);
-    ++it_avars;
-  }
-  while (it_bvars != b_vars.end()) {
-    // Add any remaining elements from b_vars
-    product_vars.push_back(*it_bvars);
-    a_shape.push_back(1);
-    b_shape.push_back(it_bvars->card());
-    ++it_bvars;
-  }
+  venn_action(a_vars.begin(), a_vars.end(),
+              b_vars.begin(), b_vars.end(),
+              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(v.card()); b_shape.push_back(1); },
+              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(1); b_shape.push_back(v.card()); },
+              [&](pgm::rv v) { product_vars.push_back(v); a_shape.push_back(v.card()); b_shape.push_back(v.card()); },
+              pgm::rv_id_comparison());
 
   // make factor data views using a_reshape and b_reshape
   // multiply the views to obtain the product_data
@@ -133,6 +130,7 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
   auto view_b = xt::reshape_view(f_b.data(), b_shape);
   return factor(product_vars, view_a * view_b);
 }
+
 
 auto factor_division(const factor& f_a, const factor& f_b) -> factor
 {
