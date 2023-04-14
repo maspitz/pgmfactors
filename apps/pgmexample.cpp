@@ -131,7 +131,31 @@ void example_sum_product_ve() {
   auto student_jpd = factor_joint_product(std::vector<pgm::factor const *>{
       &f_D, &f_I, &f_G, &f_S, &f_L
     });
-  print_factor(student_jpd);
+  pgm::rv_evidence example_specification;
+  example_specification[I] = 1;
+  example_specification[D] = 0;
+  example_specification[G] = 1; // note: in text, Val(G) = {1, 2, 3}.  So 1 represents 2.
+  example_specification[S] = 1;
+  example_specification[L] = 0;
+  auto zz = factor_reduction(student_jpd, example_specification);
+  print_factor(zz, "full evidence");
+
+  auto PL = factor_marginalization(student_jpd, I);
+  PL = factor_marginalization(PL, D);
+  PL = factor_marginalization(PL, G);
+  PL = factor_marginalization(PL, S);
+  print_factor(PL, "PL");
+
+  pgm::rv_evidence foo;
+  foo[I] = 0;
+  //auto PLi0 = factor_reduction(student_jpd, pgm::rv_evidence{{I, 0}});
+  auto PLi0 = factor_reduction(student_jpd, foo);
+  PLi0 = factor_marginalization(PLi0, D);
+  PLi0 = factor_marginalization(PLi0, G);
+  PLi0 = factor_marginalization(PLi0, S);
+//  print_factor(student_jpd);
+  print_factor(PLi0, "PL | i0");
+
   // TODO: marginalize student_jpd to query cpds...
 }
 
