@@ -1,6 +1,5 @@
 // factor.cpp
 #include <algorithm>
-#include <ranges>
 #include <string>
 #include <vector>
 
