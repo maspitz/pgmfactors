@@ -157,6 +157,11 @@ auto factor_reduction2(const factor& input, const pgm::rv_evidence& assignments)
   return pgm::factor(output_vars, xt::strided_view(input.data(), stride));
 }
 
+auto factor_normalization(const factor &f, factor::value_type norm) -> factor {
+  return pgm::factor(f.vars(), f.data() * norm / xt::sum(f.data()));
+}
+
+
 auto factor_division(const factor& f_a, const factor& f_b) -> factor
 {
   auto a_vars = f_a.vars();

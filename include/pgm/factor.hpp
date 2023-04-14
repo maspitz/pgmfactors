@@ -48,6 +48,7 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor;
 auto factor_reduction(const factor& input, const pgm::rv_evidence& assignments)
     -> factor;
 auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor;
+auto factor_normalization(const factor &f, factor::value_type norm = 1.) -> factor;
 auto factor_division(const factor& f_a, const factor& f_b) -> factor;
 
 }  // namespace pgm
