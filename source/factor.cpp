@@ -135,6 +135,23 @@ auto factor_product(const factor& f_a, const factor& f_b) -> factor
   return factor(product_vars, view_a * view_b);
 }
 
+auto factor_marginalization(const factor& input, const std::vector<pgm::rv>& summation_rvs) -> factor
+{
+  auto input_vars = input.vars();
+  std::vector<int> summation_axes;
+  factor::rv_list output_vars;
+
+  venn_action(input_vars.begin(), input_vars.end(),
+              summation_rvs.begin(), summation_rvs.end(),
+              [&](auto v) { output_vars.push_back(*v); },
+              [&](auto v) { },
+              [&](auto v) { summation_axes.push_back(v - input_vars.begin()); },
+              pgm::rv_id_comparison());
+
+  return pgm::factor(output_vars, xt::sum(input.data(), summation_axes));
+}
+
+
 // factor_reduction2 is an alternative, unexported implementation of factor_reduction.
 // It should behave identically, but it uses venn_action internally.
 // Its main drawback is that it uses std::map<>::at() because venn_action only iterates
