@@ -33,6 +33,8 @@ public:
   explicit factor(const rv_list& rand_vars, const data_array& data);
   auto data() const -> const data_array& { return m_data; }
   auto vars() const -> const rv_list& { return m_rand_vars; }
+  auto scope_contains(pgm::rv v) const -> bool {
+    return std::find(m_rand_vars.begin(), m_rand_vars.end(), v) != m_rand_vars.end(); }
   auto operator==(const factor&) const -> bool = default;
 };
 
