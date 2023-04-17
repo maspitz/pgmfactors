@@ -23,7 +23,7 @@ public:
   }
   auto id() const -> int { return m_id; }
   auto card() const -> int { return m_card; }
-  bool operator==(const rv& other) const { return this->id() == other.id(); }
+  bool operator==(const rv& other) const { return m_id == other.id(); }
 };
 
 struct rv_id_comparison {
