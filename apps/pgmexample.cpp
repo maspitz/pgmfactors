@@ -152,7 +152,23 @@ void example_sum_product_ve() {
                   {{0.95, 0.05, 0.2, 0.8}});
   pgm::factor f_L(pgm::factor::rv_list {G, L},
                   {{0.1, 0.9, 0.4, 0.6, 0.99, 0.01}});
-  // first, demonstrate inefficient inference using the full joint product:
+
+}
+
+// explicitly construct jpd to perform inference
+// (generally not efficient for large dimensional distributions)
+void example_jpd_inference() {
+  pgm::rv D(2), I(2), G(3), S(2), L(2);
+  pgm::factor f_D(pgm::factor::rv_list {D}, {{0.6, 0.4}});
+  pgm::factor f_I(pgm::factor::rv_list {I}, {{0.7, 0.3}});
+  pgm::factor f_G(pgm::factor::rv_list {I, D, G},
+                  {{0.3, 0.4, 0.3, 0.05, 0.25, 0.7,
+                     0.9, 0.08, 0.02, 0.5, 0.3, 0.2}});
+  pgm::factor f_S(pgm::factor::rv_list {I, S},
+                  {{0.95, 0.05, 0.2, 0.8}});
+  pgm::factor f_L(pgm::factor::rv_list {G, L},
+                  {{0.1, 0.9, 0.4, 0.6, 0.99, 0.01}});
+
   auto student_jpd = factor_joint_product(std::vector<pgm::factor const *>{
       &f_D, &f_I, &f_G, &f_S, &f_L
     });
