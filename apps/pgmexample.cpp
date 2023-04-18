@@ -1,11 +1,13 @@
 // pgmexample.cpp
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <string_view>
+#include <vector>
 
 #include <numeric>  // for std::reduce()
 #include <ranges>   // for std::views::keys
-#include <algorithm>  // for std::set_difference
+#include <algorithm>  // for std::set_difference, std::remove_if
 
 #include <xtensor/xarray.hpp>
 #include <xtensor/xaxis_iterator.hpp>
@@ -14,6 +16,8 @@
 #include <xtensor/xtensor.hpp>
 
 #include "pgm/factor.hpp"
+#include "pgm/rv.hpp"
+
 using namespace std;
 
 template<typename T>
@@ -145,6 +149,23 @@ pgm::factor naive_cpd_inference(const pgm::factor& jpd,
 
 
 // sum-product variable elimination
+
+std::vector<pgm::factor> sum_product_elimination(const std::vector<pgm::factor>& factors,
+                                                 const std::vector<pgm::rv>& elimination_vars) {
+  std::vector<pgm::factor> flist{factors};
+  for(auto v: elimination_vars) {
+    std::vector<pgm::factor> do_product;
+    copy_if(std::begin(flist), std::end(flist),
+            std::back_inserter(do_product),
+            [v](const pgm::factor &f) { return f.scope_contains(v); });
+    flist.erase(remove_if(std::begin(flist), std::end(flist),
+                            [v](const pgm::factor &f) { return f.scope_contains(v); }),
+                  std::end(flist));
+    flist.push_back(pgm::factor_marginalization(factor_joint_product(do_product), v));
+  }
+  return flist;
+}
+
 void example_sum_product_ve() {
   pgm::rv D(2), I(2), G(3), S(2), L(2);
   pgm::factor f_D(pgm::factor::rv_list {D}, {{0.6, 0.4}});
@@ -156,8 +177,19 @@ void example_sum_product_ve() {
                   {{0.95, 0.05, 0.2, 0.8}});
   pgm::factor f_L(pgm::factor::rv_list {G, L},
                   {{0.1, 0.9, 0.4, 0.6, 0.99, 0.01}});
+  ////auto rv_name = std::map<pgm::rv,std::string,pgm::rv_id_comparison>{{D,"D"}, {I,"I"}, {G,"G"}, {S,"S"}, {L,"L"}};
+  // variables to be eliminated in the order given.
+  // remaining variables can be queried upon.
+  auto elimination_order = std::vector<pgm::rv>{D, I, G, S};
+  auto factors = std::vector<pgm::factor>{f_D, f_I, f_G, f_S, f_L};
 
+  auto f = factor_joint_product(sum_product_elimination(factors, elimination_order));
+  print_factor(f, "P(L=1) ~ 0.502");
+
+  f = factor_joint_product(sum_product_elimination(factors, {G, I, D, S}));
+  print_factor(f, "P(L=1) ~ 0.502");
 }
+
 
 // explicitly construct jpd to perform inference
 // (generally not efficient for large dimensional distributions)
