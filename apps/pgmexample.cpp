@@ -14,6 +14,7 @@
 #include <xtensor/xtensor.hpp>
 
 #include "pgm/factor.hpp"
+using namespace std;
 
 template<typename T>
 void print_xarray_with_coords(const xt::xarray<T>& xa)
@@ -103,14 +104,17 @@ void example_factor_operations() {
 
 // TODO: consider taking std::vector<std::reference_wrapper<pgm::factor>> as the argument.
 // or for that matter, begin/end iterators that yield reference wrappers.
-pgm::factor factor_joint_product(const std::vector<pgm::factor const *> f) {
+pgm::factor factor_joint_product(const std::vector<pgm::factor>& f) {
 /*  return std::reduce(f.begin(), f.end(), [](pgm::factor const * a,
     pgm::factor const * b){return pgm::factor_product(*a, *b);});*/
-  auto it = f.begin();
-  auto jpd = **it;
+  auto it = f.cbegin();
+  // FIXME: this will crash if the input vector is empty
+  // TODO: change factor_product to permit an identity-factor as input.
+  // Then we can accumulate the product in the ordinary way.
+  auto jpd = *it;
   it++;
-  while(it != f.end()) {
-    jpd = pgm::factor_product(jpd, **it);
+  while(it != f.cend()) {
+    jpd = pgm::factor_product(jpd, *it);
     it++;
   }
   return jpd;
@@ -169,8 +173,8 @@ void example_jpd_inference() {
   pgm::factor f_L(pgm::factor::rv_list {G, L},
                   {{0.1, 0.9, 0.4, 0.6, 0.99, 0.01}});
 
-  auto student_jpd = factor_joint_product(std::vector<pgm::factor const *>{
-      &f_D, &f_I, &f_G, &f_S, &f_L
+  auto student_jpd = factor_joint_product(std::vector<pgm::factor>{
+      f_D, f_I, f_G, f_S, f_L
     });
 
     print_factor(
