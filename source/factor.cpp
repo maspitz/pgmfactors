@@ -80,10 +80,13 @@ auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor
 
 // venn_action() takes two sorted ranges and acts with the given functions on their elements.
 //
-// The idea is to call Function1 and Function2 on the appropriate set differences
-// and Function12 on the intersection.
+// The idea is to:
+// call Function1 for elements of the set difference (Set1 - Set2),
+// call Function2 for elements of the set difference (Set2 - Set1), and
+// call Function12 for elements of the set intersection (Set1 and Set2).
 //
-// The return value of these functions is irrelevant.  Only their side effects matter.
+// venn_action() returns nothing.  Its effectiveness depends entirely on the side effects
+// of the given functions.
 template <class InputIterator1, class InputIterator2,
           class Function1, class Function2, class Function12, class Compare>
   void venn_action (InputIterator1 first1, InputIterator1 last1,
