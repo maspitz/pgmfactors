@@ -68,7 +68,7 @@ auto factor_marginalization(const factor& input, pgm::rv summation_rv) -> factor
   if (a_rv_it == input_vars.end()) {
     return input;
   }
-  int rv_axis = a_rv_it - input_vars.begin();
+  auto rv_axis = a_rv_it - input_vars.begin();
   factor::rv_list output_vars;
   output_vars.reserve(input_vars.size() - 1);
   output_vars.insert(output_vars.end(), input_vars.begin(), a_rv_it);
@@ -162,12 +162,11 @@ auto factor_marginalization(const factor& input, const std::vector<pgm::rv>& sum
 auto factor_reduction2(const factor& input, const pgm::rv_evidence& assignments)
     -> factor
 {
-  auto input_vars = input.vars();
   auto assignment_vars = std::views::keys(assignments);
   factor::rv_list output_vars;
   xt::xstrided_slice_vector stride;
 
-  venn_action(input_vars.begin(), input_vars.end(),
+  venn_action(input.vars().begin(), input.vars().end(),
               assignment_vars.begin(), assignment_vars.end(),
               [&](auto v) { output_vars.push_back(*v); stride.push_back(xt::all()); },
               [&](auto v) { return; },
@@ -190,7 +189,8 @@ auto factor_division(const factor& f_a, const factor& f_b) -> factor
   auto b_shape = std::vector<int> {};
 
   // Merge a_vars and b_vars [invariant: strictly ascending order]
-  auto it_avars = a_vars.begin(), it_bvars = b_vars.begin();
+  auto it_avars = a_vars.begin();
+  auto it_bvars = b_vars.begin();
 
   // Step through both a_vars and b_vars,
   // appending the lesser-id variable at each step.
